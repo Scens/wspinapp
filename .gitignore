@@ -44,6 +44,10 @@ captures/
 .idea/assetWizardSettings.xml
 .idea/dictionaries
 .idea/libraries
+
+# Added manualy
+.idea/misc.xml
+
 # Android Studio 3 in .gitignore file.
 .idea/caches
 .idea/modules.xml
