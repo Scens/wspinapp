@@ -24,4 +24,8 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    fun watchVideo(view: View) {
+        val intent = Intent(this, WatchVideoActivity::class.java)
+        startActivity(intent)
+    }
 }
