@@ -12,12 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Wspinapp"
         tools:targetApi="31">
-        <activity
-            android:name=".DisplayMessageActivity"
-            android:exported="false">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
+        <activity android:name=".DisplayMessageActivity"
+            android:parentActivityName=".MainActivity">
         </activity>
         <activity
             android:name=".MainActivity"
