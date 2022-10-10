@@ -2,6 +2,7 @@
     <string name="app_name">wspinapp</string>
     <string name="edit_message">Enter a message</string>
     <string name="button_send">Send</string>
+    <string name="button_add_image">Add image</string>
     <string name="textview">TextView</string>
     <string name="important_image_description">important image</string>
 </resources>
