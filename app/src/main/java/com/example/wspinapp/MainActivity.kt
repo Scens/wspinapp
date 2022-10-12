@@ -2,12 +2,16 @@ package com.example.wspinapp
 
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import java.io.File
+
 
 const val EXTRA_MESSAGE = "com.example.wspinapp.MESSAGE"
 const val IMAGE_URI = "com.example.wspinapp.IMAGE_URI"
@@ -22,8 +26,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) {
-        TODO("how to get the reason for failing to save to be printed...")
-        Log.println(Log.INFO, "", "saved correctly:$it")
+        Log.println(Log.INFO, "take_picture", "saved correctly:$it")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Called when the user taps the Send button */
-    fun sendMessage(view: View) {
+    fun sendMessage(@Suppress("UNUSED_PARAMETER") view: View) {
         val editText = findViewById<EditText>(R.id.textBox)
         val message = editText.text.toString()
         val intent = Intent(this, DisplayMessageActivity::class.java).apply {
@@ -44,21 +47,24 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun watchVideo(view: View) {
+    fun watchVideo(@Suppress("UNUSED_PARAMETER") view: View) {
         val intent = Intent(this, WatchVideoActivity::class.java)
         startActivity(intent)
     }
 
-    fun uploadImage(view: View) {
+    fun uploadImage(@Suppress("UNUSED_PARAMETER") view: View) {
         uploadImageLauncher.launch(imageFolderPattern)
     }
 
-    fun takePicture(view: View) {
-        TODO("make it work ffs")
-        println(view.context.dataDir)
-        val dir = view.context.dataDir
-        val uri = Uri.parse("${dir}/wallImage.png")
-        imageUri = uri // set imageUri here, so that when you click send uploaded image is already selected
+    fun takePicture(@Suppress("UNUSED_PARAMETER") view: View) {
+        val file = File(
+            getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+            "current_picture.jpeg"
+        )
+
+        val uri = FileProvider.getUriForFile(this, "com.example.wspinapp", file)
+        imageUri = uri
+
         takePictureLauncher.launch(uri)
     }
 }
