@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">wspinapp</string>
-    <string name="edit_message">Enter a message</string>
-    <string name="button_send">Send</string>
-    <string name="textview">TextView</string>
-    <string name="important_image_description">important image</string>
-    <string name="watch_video_button">Watch video</string>
+    <string name="walls">ścianki</string>
+    <string name="take_picture">zrób zdjęcie</string>
+    <string name="upload_image">dodaj zdjęcie</string>
 </resources>
