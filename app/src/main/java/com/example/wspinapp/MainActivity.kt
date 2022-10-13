@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import kotlin.random.Random
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,5 +17,11 @@ class MainActivity : AppCompatActivity() {
     fun showImages(view: View) {
         val intent = Intent(this, ImagesActivity::class.java)
         startActivity(intent)
+    }
+
+    fun changeBackgroundColor(view: View) {
+        val logoColors = resources.getIntArray(R.array.logo_colors)
+        val randomLogoColor = logoColors[Random.nextInt(logoColors.size)]
+        view.setBackgroundColor(randomLogoColor)
     }
 }
