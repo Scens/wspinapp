@@ -7,4 +7,47 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- colors from our logo -->
+    <color name="cloud_blue">#B6E5F8</color>
+    <color name="sky_blue">#2DB8F0</color>
+
+    <color name="sand_sunny">#fcd074</color>
+    <color name="sand">#f5cb99</color>
+    <color name="sand_shadowy">#f5a95a</color>
+
+    <color name="rock_sunny">#f8854c</color>
+    <color name="rock">#eca069</color>
+    <color name="rock_shadow">#c47048</color>
+    <color name="rock_dark_shadow">#6a4d40</color>
+
+    <color name="horizon_pink">#c37992</color>
+    <color name="horizon_teal">#2dbdb1</color>
+    <color name="horizon_blue">#2fc1cd</color>
+    <color name="horizon_green">#33cba7</color>
+
+    <color name="yellow">#fef042</color>
+
+    <integer-array name="logo_colors">
+        <item>@color/white</item>
+
+        <item>@color/cloud_blue</item>
+        <item>@color/sky_blue</item>
+
+        <item>@color/sand_sunny</item>
+        <item>@color/sand</item>
+        <item>@color/sand_shadowy</item>
+
+        <item>@color/rock_sunny</item>
+        <item>@color/rock</item>
+        <item>@color/rock_shadow</item>
+        <item>@color/rock_dark_shadow</item>
+
+        <item>@color/horizon_pink</item>
+        <item>@color/horizon_teal</item>
+        <item>@color/horizon_blue</item>
+        <item>@color/horizon_green</item>
+
+        <item>@color/yellow</item>
+    </integer-array>
 </resources>

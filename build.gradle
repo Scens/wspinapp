@@ -8,3 +8,8 @@ plugins {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+tasks.register("runTests") {
+    dependsOn(":app:test")
+    group = "custom"
+}
