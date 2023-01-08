@@ -19,6 +19,11 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    fun showWalls(view: View) {
+        val intent = Intent(this, WallsActivity::class.java)
+        startActivity(intent)
+    }
+
     fun changeBackgroundColor(view: View) {
         val logoColors = resources.getIntArray(R.array.logo_colors)
         val randomLogoColor = logoColors[Random.nextInt(logoColors.size)]

@@ -8,11 +8,21 @@
     tools:context=".MainActivity">
 
     <Button
+            android:id="@+id/button2"
+            android:layout_width="251dp"
+            android:layout_height="191dp"
+            android:layout_marginTop="500dp"
+            android:onClick="showImages"
+            android:text="@string/walls"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+    <Button
         android:id="@+id/button"
         android:layout_width="251dp"
         android:layout_height="191dp"
         android:layout_marginTop="16dp"
-        android:onClick="showImages"
+        android:onClick="showWalls"
         android:text="@string/walls"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

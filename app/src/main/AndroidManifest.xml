@@ -29,6 +29,10 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
         <activity
+            android:name=".WallsActivity"
+            android:exported="false"
+            android:parentActivityName=".WallsActivity" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
