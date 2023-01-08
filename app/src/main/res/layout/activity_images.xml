@@ -38,6 +38,7 @@
         android:layout_height="71dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:onClick="popUpImage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.049"
         app:layout_constraintStart_toStartOf="parent"

@@ -17,6 +17,14 @@
         android:theme="@style/Theme.Wspinapp"
         tools:targetApi="31">
         <activity
+            android:name=".PopUpImageActivity"
+            android:exported="false"
+            android:parentActivityName=".ImagesActivity">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".ImagesActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
