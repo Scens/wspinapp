@@ -1,6 +1,7 @@
 package com.example.wspinapp
 
 import android.util.Log
+import com.example.wspinapp.model.AddWall
 import com.example.wspinapp.model.Wall
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -24,5 +25,16 @@ class Datasource {
         val res : List<Wall> = Gson().fromJson(responseBody, listType)
         Log.println(Log.DEBUG, "response body as a wall list", res.toString())
         return res
+    }
+
+    suspend fun addWall(wall: AddWall) {
+        val json = Gson().toJson(wall).toString()
+        val response: HttpResponse = client.post("http://wspinapp-backend.ddns.net/walls") {
+            basicAuth("wspinapp", "wspinapp")
+            setBody(json)
+        }
+
+        Log.println(Log.DEBUG, "Request to wspinapi ", json )
+        Log.println(Log.DEBUG, "response body from wspinapi ", response.bodyAsText())
     }
 }

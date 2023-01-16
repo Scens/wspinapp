@@ -16,3 +16,14 @@ data class Wall(
     val DeletedAt: String,
     val Holds: Array<Hold>,
     val Image: String)
+
+
+data class AddHold(
+    val x: Float,
+    val y: Float,
+    val radius: Float
+)
+
+data class AddWall(
+    val Holds: Array<AddHold>
+)
