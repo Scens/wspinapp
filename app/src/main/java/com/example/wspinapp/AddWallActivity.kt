@@ -3,24 +3,37 @@ package com.example.wspinapp
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.example.wspinapp.model.AddHold
 import com.example.wspinapp.model.AddWall
 import kotlinx.coroutines.runBlocking
+import java.io.File
 import kotlin.math.abs
 import kotlin.math.sqrt
 
 class AddWallActivity : AppCompatActivity() {
     private var circleRadius = 50f
+
+    private val takePictureLauncher =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) {
+            Log.println(Log.INFO, "take_picture", "saved correctly:$it")
+            val imageView = findViewById<ImageView>(R.id.add_wall_image)
+            imageView.setImageURI(getUri())
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.add_wall)
@@ -30,9 +43,18 @@ class AddWallActivity : AppCompatActivity() {
     }
 
     private fun setImageView() {
-        val imageView = findViewById<ImageView>(R.id.add_wall_image)
+        takePictureLauncher.launch(getUri())
         val overlay = findViewById<CircleOverlayView>(R.id.holds_canvas)
         overlay.setCircleRadius(circleRadius)
+    }
+
+    private fun getUri(): Uri {
+        val file = File(
+            getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+            "current_picture.jpeg"
+        )
+
+        return FileProvider.getUriForFile(this, "com.example.wspinapp", file)
     }
 
     private fun setSeekBar() {
@@ -60,13 +82,26 @@ class AddWallActivity : AppCompatActivity() {
     }
 
     fun submitWall(view: View) {
+        Log.println(Log.DEBUG, " submit wall ", "submitting wall")
         val holds = findViewById<CircleOverlayView>(R.id.holds_canvas).getHolds()
+        var wallId: UInt
         runBlocking {
-            Datasource().addWall(AddWall(holds.toTypedArray()))
+            wallId = Datasource().addWall(AddWall(holds.toTypedArray()))
         }
+
+        val inputStream = contentResolver.openInputStream(getUri())
+        val bytes = inputStream!!.readBytes()
+        inputStream.close()
+
         runBlocking {
             // update image here
+            Datasource().addImage(wallId, File(
+                getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                "current_picture.jpeg"
+            ))
         }
+
+        //}
         finish() // probably need to do sth else though :)
     }
 }
@@ -123,7 +158,7 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
     // other constructors can be added here as well, depending on your requirements
 
     private fun coordinatesInsideImageView(x: Float, y: Float) : Boolean {
-        return x >= circleRadius && x + circleRadius <= this.width && y >= circleRadius && y + circleRadius <= this.height
+        return x >= draggedCircleRadius && x + draggedCircleRadius <= this.width && y >= draggedCircleRadius && y + draggedCircleRadius <= this.height
     }
 
     private fun pointInCircle(x: Float, y: Float, circle: AddHold) : Boolean {
