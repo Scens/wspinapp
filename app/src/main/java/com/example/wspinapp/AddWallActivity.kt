@@ -17,8 +17,9 @@ import android.widget.SeekBar
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.example.wspinapp.model.AddHold
+import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.AddWall
+import com.example.wspinapp.utils.BackendClient
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import kotlin.math.abs
@@ -86,23 +87,18 @@ class AddWallActivity : AppCompatActivity() {
         val holds = findViewById<CircleOverlayView>(R.id.holds_canvas).getHolds()
         var wallId: UInt
         runBlocking {
-            wallId = Datasource().addWall(AddWall(holds.toTypedArray()))
+            wallId = BackendClient().addWall(AddWall(holds.toTypedArray()))
         }
 
-        val inputStream = contentResolver.openInputStream(getUri())
-        val bytes = inputStream!!.readBytes()
-        inputStream.close()
-
         runBlocking {
-            // update image here
-            Datasource().addImage(wallId, File(
+            BackendClient().addImageToWall(wallId, File(
                 getExternalFilesDir(Environment.DIRECTORY_PICTURES),
                 "current_picture.jpeg"
             ))
         }
-
-        //}
+        invalid = true
         finish() // probably need to do sth else though :)
+
     }
 }
 
@@ -137,6 +133,8 @@ class CircleView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 }
 
+
+// TODO maybe this should be implemented using ScaleGestureDetector somehow?
 class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val circleDrawer = CircleDrawer(context)
 
@@ -148,7 +146,7 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
     private var draggedCircleRadius = 0f
     private var finishedDragging: Boolean = false
 
-    private val circles = mutableListOf<AddHold>()
+    private val circles = mutableListOf<Hold>()
 
     init {
         // any initialization code here
@@ -161,11 +159,11 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
         return x >= draggedCircleRadius && x + draggedCircleRadius <= this.width && y >= draggedCircleRadius && y + draggedCircleRadius <= this.height
     }
 
-    private fun pointInCircle(x: Float, y: Float, circle: AddHold) : Boolean {
-        val distX = abs(circle.x - x)
-        val distY = abs(circle.y - y)
+    private fun pointInCircle(x: Float, y: Float, circle: Hold) : Boolean {
+        val distX = abs(circle.X - x)
+        val distY = abs(circle.Y - y)
 
-        return sqrt(distX * distX + distY * distY) <= circle.radius
+        return sqrt(distX * distX + distY * distY) <= circle.Size
     }
 
     fun setCircleRadius(circleRadius: Float) {
@@ -175,7 +173,7 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
 
     // we're either dragging an existing circle or creating a new circle with current radius
     private fun getCircleRadius(): Float {
-        val toRemove = mutableListOf<AddHold>()
+        val toRemove = mutableListOf<Hold>()
         for (circle in circles) {
             if (pointInCircle(touchX, touchY, circle)) {
                 toRemove.add(circle)
@@ -183,12 +181,14 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
         }
         circles.removeAll(toRemove) // actually would be better to only remove one circle - the one that is closest to center
         return if (toRemove.size > 0) {
-            toRemove[0].radius // for now simply take first one
+            toRemove[0].Size // for now simply take first one
         } else {
             circleRadius
         }
     }
 
+
+    // This warning says that we didn't override performClick method - this is a method that is helpful to people with impaired vision
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         // we register coordinates of last touch
@@ -201,7 +201,15 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
 
         if (event.action == MotionEvent.ACTION_UP) {
             if (coordinatesInsideImageView(touchX, touchY)) {
-                circles.add(AddHold(touchX, touchY, draggedCircleRadius))
+                circles.add(
+                    Hold(
+                        X = touchX,
+                        Y = touchY,
+                        Size = draggedCircleRadius,
+                        Shape = "Circle",
+                        Angle = 0f
+                    )
+                )
             }
             finishedDragging = true
         }
@@ -212,7 +220,7 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         circles.forEach {
-            circleDrawer.drawCircle(canvas, it.x, it.y, it.radius)
+            circleDrawer.drawCircle(canvas, it.X, it.Y, it.Size)
         }
 
         // drawing circle that is being dragged
@@ -224,7 +232,7 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
             }
     }
 
-    fun getHolds() : List<AddHold> {
+    fun getHolds() : List<Hold> {
         return circles.toList()
     }
 

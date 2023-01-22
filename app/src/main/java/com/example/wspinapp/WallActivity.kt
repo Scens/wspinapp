@@ -4,12 +4,16 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ImageView
 import coil.load
+
+const val IMAGE_URL_MESSAGE = "com.example.wspinapp.IMAGE_URL"
+
 class WallActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.wall)
 
         setImageView()
+//        getWallAndDisplayHolds()
     }
 
     private fun setImageView() {
@@ -20,8 +24,5 @@ class WallActivity : AppCompatActivity() {
                 imageView.load(imageUrl)
             }
         }
-//        val overlay = CircleOverlayView(this)
-//        overlay.setImageView(imageView)
-//        addContentView(overlay, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     }
 }

@@ -12,7 +12,7 @@ import com.example.wspinapp.model.Wall
 import kotlinx.coroutines.CoroutineScope
 
 
-val imageUrls: MutableMap<UInt, String> = mutableMapOf()
+val imageUrls: MutableMap<UInt, String?> = mutableMapOf()
 
 class WallAdapter(
     private val context: CoroutineScope,
@@ -36,10 +36,10 @@ class WallAdapter(
         textView.text = item.ID.toString()
 
 
-        if (item.Image.startsWith("https://res.cloudinary.com")) {
-            holder.wallView.findViewById<ImageView>(R.id.wall_image).load(item.Image)
+        if (item.ImageUrl?.isBlank() == false) {
+            holder.wallView.findViewById<ImageView>(R.id.wall_image).load(item.ImageUrl)
         }
-        imageUrls[item.ID] = item.Image
+        imageUrls[item.ID!!] = item.ImageUrl
     }
 
     override fun getItemCount(): Int {

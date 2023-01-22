@@ -1,29 +1,30 @@
 package com.example.wspinapp.model
 
 data class Hold(
-    val ID: UInt,
-    val CreatedAt: String,
-    val UpdatedAt: String,
-    val DeletedAt: String,
-    val X: Int,
-    val Y: Int
+    val X: Float,
+    val Y: Float,
+    val Size: Float,
+    val Shape: String,
+    val Angle: Float,
+
+    val ID: UInt = 0u,
+    val CreatedAt: String = "",
+    val UpdatedAt: String = "",
+    val DeletedAt: String = "",
+    val WallId: UInt = 0u
 )
+
+
 
 data class Wall(
-    val ID: UInt,
-    val CreatedAt: String,
-    val UpdatedAt: String,
-    val DeletedAt: String,
     val Holds: Array<Hold>,
-    val Image: String)
+    val ImageUrl: String,
 
-
-data class AddHold(
-    val x: Float,
-    val y: Float,
-    val radius: Float
+    val ID: UInt = 0u,
+    val CreatedAt: String = "",
+    val UpdatedAt: String = "",
+    val DeletedAt: String = "",
 )
-
 data class AddWall(
-    val Holds: Array<AddHold>
+    val Holds: Array<Hold>
 )

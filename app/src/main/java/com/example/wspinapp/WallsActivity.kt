@@ -8,6 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.runBlocking
 
+var invalid = false
+
+
+// TODO I have a feeling logic below can be faster - there are probably some tools that can be easily used here
 class WallsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,8 +21,18 @@ class WallsActivity : AppCompatActivity() {
         runBlocking {
             val walls = Datasource().loadWalls()
             recyclerView.adapter = WallAdapter(this, walls)
+        }
+    }
 
-            recyclerView.setHasFixedSize(true)
+    override fun onResume() {
+        super.onResume()
+        if (!invalid) {
+            return
+        }
+        val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
+        runBlocking {
+            val walls = Datasource().loadWalls()
+            recyclerView.adapter = WallAdapter(this, walls)
         }
     }
 

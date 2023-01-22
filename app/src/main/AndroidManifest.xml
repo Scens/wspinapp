@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<!--    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />-->
     <uses-permission android:name="android.permission.ACTION_OPEN_DOCUMENT" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -16,18 +16,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Wspinapp"
         tools:targetApi="31">
-        <activity
-            android:name=".PopUpImageActivity"
-            android:exported="false"
-            android:parentActivityName=".ImagesActivity">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".ImagesActivity"
-            android:exported="false"
-            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".WallsActivity"
             android:exported="false"
