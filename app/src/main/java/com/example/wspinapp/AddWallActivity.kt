@@ -18,7 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.wspinapp.model.Hold
-import com.example.wspinapp.model.AddWall
+import com.example.wspinapp.model.Wall
 import com.example.wspinapp.utils.BackendClient
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -87,7 +87,7 @@ class AddWallActivity : AppCompatActivity() {
         val holds = findViewById<CircleOverlayView>(R.id.holds_canvas).getHolds()
         var wallId: UInt
         runBlocking {
-            wallId = BackendClient().addWall(AddWall(holds.toTypedArray()))
+            wallId = BackendClient().addWall(Wall(holds.toTypedArray()))
         }
 
         runBlocking {
@@ -96,6 +96,8 @@ class AddWallActivity : AppCompatActivity() {
                 "current_picture.jpeg"
             ))
         }
+
+        // TODO instead of fetching walls again we can simply use the response and add it by hand here
         invalid = true
         finish() // probably need to do sth else though :)
 
