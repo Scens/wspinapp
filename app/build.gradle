@@ -1,7 +1,9 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id "org.jetbrains.kotlin.plugin.serialization" version "1.8.0"
 }
+
 
 android {
     compileSdk 33
@@ -38,7 +40,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1'
     implementation 'io.ktor:ktor-client-core:2.2.2'
     implementation 'io.ktor:ktor-client-cio:2.2.2'
     implementation 'io.coil-kt:coil:2.2.2'

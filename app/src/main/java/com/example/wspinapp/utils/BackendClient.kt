@@ -1,10 +1,7 @@
 package com.example.wspinapp.utils
 
 import android.util.Log
-import com.example.wspinapp.model.AddWall
 import com.example.wspinapp.model.Wall
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
@@ -12,6 +9,9 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import java.io.File
 import java.util.*
 
@@ -26,32 +26,29 @@ class BackendClient {
         }
         val responseBody = response.bodyAsText()
 
-        val listType = object : TypeToken<List<Wall>>() {}.type
-
         Log.println(Log.DEBUG, "response body from wspinapi ", responseBody)
 
         val res : List<Wall> = if (responseBody == "") {
             emptyList()
         } else {
-            Gson().fromJson(responseBody, listType)
+            Json.decodeFromString(responseBody)
         }
         Log.println(Log.DEBUG, "response body as a wall list", res.toString())
         return res
     }
 
-    suspend fun addWall(wall: AddWall): UInt {
-        val json = Gson().toJson(wall).toString()
+    suspend fun addWall(wall: Wall): UInt {
         val response: HttpResponse = client.post("$BACKEND_URL/walls") {
             basicAuth("wspinapp", "wspinapp")
-            setBody(json)
+            setBody(Json.encodeToString(wall))
         }
 
-        Log.println(Log.DEBUG, "Request to wspinapi ", json )
-        Log.println(Log.DEBUG, "response body from wspinapi ", response.bodyAsText())
-        val res : Wall = Gson().fromJson(response.bodyAsText(), Wall::class.java)
-
+        if (response.status != HttpStatusCode.Created) {
+            Log.println(Log.INFO, "backend-client", "Failed to create wall, status=${response.status}")
+            return 0u
+        }
+        val res : Wall = Json.decodeFromString(response.bodyAsText())
         return res.ID!!
-
     }
 
 
@@ -94,8 +91,7 @@ class BackendClient {
         return if (responseBody == "") {
             null
         } else {
-            val res : Wall = Gson().fromJson(responseBody, Wall::class.java)
-            res
+            return Json.decodeFromString(responseBody)
         }
     }
 }
