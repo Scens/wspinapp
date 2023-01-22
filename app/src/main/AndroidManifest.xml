@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<!--    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />-->
     <uses-permission android:name="android.permission.ACTION_OPEN_DOCUMENT" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -17,17 +17,17 @@
         android:theme="@style/Theme.Wspinapp"
         tools:targetApi="31">
         <activity
-            android:name=".PopUpImageActivity"
+            android:name=".WallsActivity"
             android:exported="false"
-            android:parentActivityName=".ImagesActivity">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
+            android:parentActivityName=".WallsActivity" />
         <activity
-            android:name=".ImagesActivity"
+            android:name=".AddWallActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".AddWallActivity" />
+        <activity
+            android:name=".WallActivity"
+            android:exported="false"
+            android:parentActivityName=".WallActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

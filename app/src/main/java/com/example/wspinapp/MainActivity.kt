@@ -14,8 +14,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    fun showImages(view: View) {
-        val intent = Intent(this, ImagesActivity::class.java)
+    fun showWalls(view: View) {
+        val intent = Intent(this, WallsActivity::class.java)
         startActivity(intent)
     }
 
