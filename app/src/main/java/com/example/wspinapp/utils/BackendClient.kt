@@ -83,16 +83,15 @@ class BackendClient {
         return response
     }
 
-//    suspend fun getWall(wallId: UInt): Wall? {
-//        val response: HttpResponse = client.get("$BACKEND_URL/walls/$wallId") {
-//            basicAuth("wspinapp", "wspinapp")
-//        }
-//        val responseBody = response.bodyAsText()
-//        return if (responseBody == "") {
-//            null
-//        } else {
-//            val res : Wall = Gson().fromJson(responseBody, Wall::class.java)
-//            res
-//        }
-//    }
+    suspend fun getWall(wallId: UInt): Wall? {
+        val response: HttpResponse = client.get("$BACKEND_URL/walls/$wallId") {
+            basicAuth("wspinapp", "wspinapp")
+        }
+        val responseBody = response.bodyAsText()
+        return if (responseBody == "") {
+            null
+        } else {
+            return Json.decodeFromString(responseBody)
+        }
+    }
 }
