@@ -102,7 +102,6 @@ class BackendClient {
             return emptyList()
         }
 
-        println(response.bodyAsText())
         val routes: List<Route> = Json.decodeFromString(response.bodyAsText())
         Log.println(Log.INFO, "backend-client", "Fetched ${routes.size} routes for wall=$wallId")
 
