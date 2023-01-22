@@ -1,6 +1,7 @@
 package com.example.wspinapp.utils
 
 import android.util.Log
+import com.example.wspinapp.model.Route
 import com.example.wspinapp.model.Wall
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -13,11 +14,11 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.File
-import java.util.*
 
 
 const val BACKEND_URL = "http://wspinapp-backend.ddns.net"
 val client = HttpClient(CIO)
+val backendClient = BackendClient()
 
 class BackendClient {
     suspend fun fetchWalls(): List<Wall> {
@@ -26,14 +27,11 @@ class BackendClient {
         }
         val responseBody = response.bodyAsText()
 
-        Log.println(Log.DEBUG, "response body from wspinapi ", responseBody)
-
         val res : List<Wall> = if (responseBody == "") {
             emptyList()
         } else {
             Json.decodeFromString(responseBody)
         }
-        Log.println(Log.DEBUG, "response body as a wall list", res.toString())
         return res
     }
 
@@ -93,5 +91,21 @@ class BackendClient {
         } else {
             return Json.decodeFromString(responseBody)
         }
+    }
+
+    suspend fun fetchRoutes(wallId: UInt): List<Route> {
+        val response: HttpResponse = client.get("$BACKEND_URL/walls/$wallId/routes") {
+            basicAuth("wspinapp", "wspinapp")
+        }
+        if (response.status != HttpStatusCode.OK) {
+            Log.println(Log.INFO, "backend-client", "Failed to get routes for wall=$wallId, status=${response.status}")
+            return emptyList()
+        }
+
+        println(response.bodyAsText())
+        val routes: List<Route> = Json.decodeFromString(response.bodyAsText())
+        Log.println(Log.INFO, "backend-client", "Fetched ${routes.size} routes for wall=$wallId")
+
+        return routes
     }
 }

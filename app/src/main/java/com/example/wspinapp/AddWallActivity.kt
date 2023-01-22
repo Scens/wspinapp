@@ -19,7 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.Wall
-import com.example.wspinapp.utils.BackendClient
+import com.example.wspinapp.utils.backendClient
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import kotlin.math.abs
@@ -87,11 +87,11 @@ class AddWallActivity : AppCompatActivity() {
         val holds = findViewById<CircleOverlayView>(R.id.holds_canvas).getHolds()
         var wallId: UInt
         runBlocking {
-            wallId = BackendClient().addWall(Wall(holds.toTypedArray()))
+            wallId = backendClient.addWall(Wall(holds.toTypedArray()))
         }
 
         runBlocking {
-            BackendClient().addImageToWall(wallId, File(
+            backendClient.addImageToWall(wallId, File(
                 getExternalFilesDir(Environment.DIRECTORY_PICTURES),
                 "current_picture.jpeg"
             ))
