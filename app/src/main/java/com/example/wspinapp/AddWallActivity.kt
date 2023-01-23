@@ -3,6 +3,7 @@ package com.example.wspinapp
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -105,11 +106,12 @@ class AddWallActivity : AppCompatActivity() {
 }
 
 
-class CircleDrawer(context: Context) {
+class CircleDrawer(context: Context, color: Int = R.color.yellow, alpha: Int = 255) {
     private val paint: Paint = Paint()
 
     init {
-        paint.color = ContextCompat.getColor(context, R.color.yellow)
+        paint.color = ContextCompat.getColor(context, color)
+        paint.alpha = alpha
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 10f
     }

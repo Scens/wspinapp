@@ -45,7 +45,7 @@ class WallsActivity : AppCompatActivity() {
     }
 
     fun openWall(view: View) {
-        val wallId = view.findViewById<TextView>(R.id.wall_id).text.toString().toInt().toUInt()
+        val wallId = view.tag
         val intent = Intent(this, WallActivity::class.java).putExtra(WALL_ID_MESSAGE, wallId.toString())
         startActivity(intent)
     }
@@ -65,6 +65,10 @@ class WallAdapter(
 
     class WallViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val wallView: ConstraintLayout = view.findViewById(R.id.wall_preview)
+
+        fun setTag(tag: UInt) {
+            wallView.tag = tag
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WallViewHolder {
@@ -83,6 +87,8 @@ class WallAdapter(
             holder.wallView.findViewById<ImageView>(R.id.wall_image).load(item.ImageUrl)
         }
         walls[item.ID!!] = item
+        holder.setTag(item.ID)
+
     }
 
     override fun getItemCount(): Int {
