@@ -107,4 +107,21 @@ class BackendClient {
 
         return routes
     }
+
+    suspend fun addRoute(route: Route): Route? {
+        val response: HttpResponse = client.post("$BACKEND_URL/walls/${route.WallID}/routes") {
+            basicAuth("wspinapp", "wspinapp")
+            setBody(Json.encodeToString(route))
+        }
+
+        if (response.status != HttpStatusCode.Created) {
+            Log.println(
+                Log.INFO,
+                "backend-client",
+                "Failed to create route, status=${response.status}"
+            )
+            return null
+        }
+        return Json.decodeFromString<Route>(response.bodyAsText())
+    }
 }

@@ -18,6 +18,10 @@ data class Hold(
     val WallID: UInt? = null
 )
 
+enum class HoldType {
+    WALL_HOLD, HOLD, START_HOLD, TOP_HOLD
+}
+
 
 @Serializable
 data class Wall(

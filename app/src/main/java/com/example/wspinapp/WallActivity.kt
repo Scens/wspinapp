@@ -25,12 +25,13 @@ import kotlinx.coroutines.runBlocking
 const val WALL_ID_MESSAGE = "com.example.wspinapp.WALL_ID"
 
 class WallActivity : AppCompatActivity() {
+    var wallID: UInt = 0u
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.wall)
 
 
-        val wallID: UInt = intent.getStringExtra(WALL_ID_MESSAGE)!!.toUInt()
+        wallID = intent.getStringExtra(WALL_ID_MESSAGE)!!.toUInt()
         val wall: Wall = walls[wallID]!!
 
         setImageView(wall.ImageUrl)
@@ -44,7 +45,7 @@ class WallActivity : AppCompatActivity() {
             recyclerView.adapter = RouteAdapter(this, routes)
         }
 
-        setHoldOverlay(wall.Holds) // this is not that obvious actually
+        setHoldOverlay(wall.Holds)
     }
 
     private fun setImageView(imageUrl: String?) {
@@ -74,6 +75,12 @@ class WallActivity : AppCompatActivity() {
         val overlay = findViewById<HoldsOverlay>(R.id.wall_holds_canvas)
         overlay.resetHolds()
         overlay.invalidate()
+    }
+
+    fun addRoute(view: View) {
+        val intent =
+            Intent(this, AddRouteActivity::class.java).putExtra(WALL_ID_MESSAGE, wallID.toString())
+        startActivity(intent)
     }
 }
 
