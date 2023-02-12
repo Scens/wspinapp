@@ -26,8 +26,8 @@ enum class HoldType {
 @Serializable
 data class Wall(
     val Holds: Array<Hold>,
-    val ImageUrl: String? = null,
-    val ImagePreviewUrl: String? = null,
+    var ImageUrl: String? = null,
+    var ImagePreviewUrl: String? = null,
 
     val ID: UInt? = null,
     val CreatedAt: String? = null,

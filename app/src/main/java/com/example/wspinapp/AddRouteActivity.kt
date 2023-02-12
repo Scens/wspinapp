@@ -58,7 +58,7 @@ class AddRouteActivity : AppCompatActivity() {
         }
 
         runBlocking {
-            backendClient.addRoute(
+            val route = backendClient.addRoute(
                 Route(
                     Holds = routeHolds,
                     StartHolds = startHolds,
@@ -66,6 +66,11 @@ class AddRouteActivity : AppCompatActivity() {
                     WallID = wallID
                 )
             )
+                ?: // TODO HANDLE ERROR
+                return@runBlocking
+
+            routes_dataset.add(route)
+            wall_invalid = true
         }
 
         finish()
@@ -157,9 +162,3 @@ class AddHoldsOverlayView constructor(context: Context, attrs: AttributeSet?) : 
         return holds
     }
 }
-
-
-
-
-
-
