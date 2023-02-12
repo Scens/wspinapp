@@ -17,21 +17,31 @@ import java.io.File
 
 
 const val BACKEND_URL = "http://wspinapp-backend.ddns.net"
-val client = HttpClient(CIO)
+val client = HttpClient(CIO) {
+    install(HttpTimeout)
+}
 val backendClient = BackendClient()
 
 class BackendClient {
-    suspend fun fetchWalls(): List<Wall> {
+    private fun logResponse(response: HttpResponse) {
+        Log.println(Log.INFO, "backend-client", "Request for ${response.request.url} resulted in status ${response.status}")
+    }
+
+
+    suspend fun fetchWalls(): MutableList<Wall> {
         val response: HttpResponse = client.get("$BACKEND_URL/walls") {
             basicAuth("wspinapp", "wspinapp")
         }
         val responseBody = response.bodyAsText()
 
-        val res : List<Wall> = if (responseBody == "") {
-            emptyList()
+        val res : MutableList<Wall> = if (responseBody == "") {
+            ArrayList()
         } else {
             Json.decodeFromString(responseBody)
         }
+
+        logResponse(response)
+
         return res
     }
 
@@ -46,23 +56,26 @@ class BackendClient {
             return 0u
         }
         val res : Wall = Json.decodeFromString(response.bodyAsText())
+
+        logResponse(response)
+
         return res.ID!!
     }
 
 
-    suspend fun addImageToWall(wallId: UInt, file: File): HttpResponse {
+    suspend fun addImageToWall(wallId: UInt, file: File, path: String? = "image"): HttpResponse {
         val response: HttpResponse =
-            client.patch("$BACKEND_URL/walls/$wallId/image") {
+            client.patch("$BACKEND_URL/walls/$wallId/$path") {
                 basicAuth("wspinapp", "wspinapp")
                 setBody(
                     MultiPartFormDataContent(
                         formData {
                             append("description", "wall_image_id_$wallId")
                             append("file", file.readBytes(), Headers.build {
-                                append(HttpHeaders.ContentType, "image/png")
+                                append(HttpHeaders.ContentType, "image/webp")
                                 append(
                                     HttpHeaders.ContentDisposition,
-                                    "filename=\"wall_image_id_$wallId.png\""
+                                    "filename=\"wall_image_id_$wallId.webp\""
                                 )
                             })
                         },
@@ -76,8 +89,12 @@ class BackendClient {
                         "Sent $bytesSentTotal bytes from $contentLength"
                     )
                 }
+
+                timeout {
+                    requestTimeoutMillis = 100000
+                }
             }
-        Log.println(Log.DEBUG, "backend-client", response.status.toString())
+        logResponse(response)
         return response
     }
 
@@ -85,6 +102,7 @@ class BackendClient {
         val response: HttpResponse = client.get("$BACKEND_URL/walls/$wallId") {
             basicAuth("wspinapp", "wspinapp")
         }
+        logResponse(response)
         val responseBody = response.bodyAsText()
         return if (responseBody == "") {
             null
@@ -103,7 +121,7 @@ class BackendClient {
         }
 
         val routes: List<Route> = Json.decodeFromString(response.bodyAsText())
-        Log.println(Log.INFO, "backend-client", "Fetched ${routes.size} routes for wall=$wallId")
+        logResponse(response)
 
         return routes
     }
@@ -122,6 +140,14 @@ class BackendClient {
             )
             return null
         }
+        logResponse(response)
         return Json.decodeFromString<Route>(response.bodyAsText())
+    }
+
+    suspend fun deleteWall(wallId: UInt) {
+        val response: HttpResponse = client.delete("$BACKEND_URL/walls/${wallId}") {
+            basicAuth("wspinapp", "wspinapp")
+        }
+        logResponse(response)
     }
 }

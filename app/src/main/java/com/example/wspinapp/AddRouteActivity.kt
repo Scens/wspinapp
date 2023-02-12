@@ -129,7 +129,6 @@ class AddHoldsOverlayView constructor(context: Context, attrs: AttributeSet?) : 
                 }
             }
         }
-        println("ABC")
         invalidate()
         return true
     }

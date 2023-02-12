@@ -2,8 +2,8 @@ package com.example.wspinapp
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -15,26 +15,30 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.Wall
+import com.example.wspinapp.utils.ImageDealer
 import com.example.wspinapp.utils.backendClient
+import id.zelory.compressor.Compressor
+import id.zelory.compressor.constraint.format
+import id.zelory.compressor.constraint.quality
+import id.zelory.compressor.constraint.resolution
+import id.zelory.compressor.constraint.size
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import kotlin.math.abs
 import kotlin.math.sqrt
 
+
+// TODO Refactor so that it's easier to understand what's going on in here
 class AddWallActivity : AppCompatActivity() {
     private var circleRadius = 50f
-
-    private val takePictureLauncher =
-        registerForActivityResult(ActivityResultContracts.TakePicture()) {
-            Log.println(Log.INFO, "take_picture", "saved correctly:$it")
-            val imageView = findViewById<ImageView>(R.id.add_wall_image)
-            imageView.setImageURI(getUri())
-        }
+    private var imageDealer = ImageDealer(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,18 +49,9 @@ class AddWallActivity : AppCompatActivity() {
     }
 
     private fun setImageView() {
-        takePictureLauncher.launch(getUri())
+        imageDealer.takePicture(findViewById(R.id.add_wall_image))
         val overlay = findViewById<CircleOverlayView>(R.id.holds_canvas)
         overlay.setCircleRadius(circleRadius)
-    }
-
-    private fun getUri(): Uri {
-        val file = File(
-            getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-            "current_picture.jpeg"
-        )
-
-        return FileProvider.getUriForFile(this, "com.example.wspinapp", file)
     }
 
     private fun setSeekBar() {
@@ -83,6 +78,7 @@ class AddWallActivity : AppCompatActivity() {
         })
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun submitWall(view: View) {
         Log.println(Log.DEBUG, " submit wall ", "submitting wall")
         val holds = findViewById<CircleOverlayView>(R.id.holds_canvas).getHolds()
@@ -91,13 +87,13 @@ class AddWallActivity : AppCompatActivity() {
             wallId = backendClient.addWall(Wall(holds.toTypedArray()))
         }
 
-        runBlocking {
-            backendClient.addImageToWall(wallId, File(
-                getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                "current_picture.jpeg"
-            ))
+        GlobalScope.launch {
+            imageDealer.uploadCompressedImage(wallId)
         }
 
+        runBlocking {
+            imageDealer.uploadCompressedImagePreview(wallId) // this weights up to 10kb so it should be fairly fast
+        }
         // TODO instead of fetching walls again we can simply use the response and add it by hand here
         invalid = true
         finish() // probably need to do sth else though :)

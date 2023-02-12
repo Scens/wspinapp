@@ -27,6 +27,7 @@ enum class HoldType {
 data class Wall(
     val Holds: Array<Hold>,
     val ImageUrl: String? = null,
+    val ImagePreviewUrl: String? = null,
 
     val ID: UInt? = null,
     val CreatedAt: String? = null,
@@ -41,6 +42,7 @@ data class Wall(
 
         if (!Holds.contentEquals(other.Holds)) return false
         if (ImageUrl != other.ImageUrl) return false
+        if (ImagePreviewUrl != other.ImagePreviewUrl) return false
         if (ID != other.ID) return false
         if (CreatedAt != other.CreatedAt) return false
         if (UpdatedAt != other.UpdatedAt) return false
@@ -51,11 +53,12 @@ data class Wall(
 
     override fun hashCode(): Int {
         var result = Holds.contentHashCode()
-        result = 31 * result + ImageUrl.hashCode()
-        result = 31 * result + ID.hashCode()
-        result = 31 * result + CreatedAt.hashCode()
-        result = 31 * result + UpdatedAt.hashCode()
-        result = 31 * result + DeletedAt.hashCode()
+        result = 31 * result + (ImageUrl?.hashCode() ?: 0)
+        result = 31 * result + (ImagePreviewUrl?.hashCode() ?: 0)
+        result = 31 * result + (ID?.hashCode() ?: 0)
+        result = 31 * result + (CreatedAt?.hashCode() ?: 0)
+        result = 31 * result + (UpdatedAt?.hashCode() ?: 0)
+        result = 31 * result + (DeletedAt?.hashCode() ?: 0)
         return result
     }
 }
