@@ -23,30 +23,42 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 
 const val WALL_ID_MESSAGE = "com.example.wspinapp.WALL_ID"
+var wall_invalid: Boolean = false
 
 class WallActivity : AppCompatActivity() {
+    lateinit var routesRV: RecyclerView
     var wallID: UInt = 0u
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.wall)
 
+        routesRV = findViewById(R.id.routes_recycler_view)
 
         wallID = intent.getStringExtra(WALL_ID_MESSAGE)!!.toUInt()
         val wall: Wall = walls[wallID]!!
 
         setImageView(wall.ImageUrl)
 
-        val recyclerView = findViewById<RecyclerView>(R.id.routes_recycler_view)
         val gridLayoutManager = GridLayoutManager(this, 3)
-        recyclerView.layoutManager = gridLayoutManager
+        routesRV.layoutManager = gridLayoutManager
 
         runBlocking {
-            val routes = backendClient.fetchRoutes(wallID)
-            recyclerView.adapter = RouteAdapter(this, routes)
+            // TODO if connection fails the exit gracefully instead of crashing app
+            routes_dataset = backendClient.fetchRoutes(wallID)
+            routesRV.adapter = RouteAdapter(this)
         }
 
         setHoldOverlay(wall.Holds)
     }
+
+    override fun onResume() {
+        super.onResume()
+        if (!wall_invalid) {
+            return
+        }
+        routesRV.adapter?.notifyDataSetChanged()
+    }
+
 
     private fun setImageView(imageUrl: String?) {
         val imageView = findViewById<ImageView>(R.id.wall_image)
@@ -141,10 +153,10 @@ class HoldsOverlay constructor(context: Context, attrs: AttributeSet?) : View(co
 }
 
 val routes: MutableMap<UInt, Route> = mutableMapOf()
+var routes_dataset: MutableList<Route> = ArrayList()
 
 class RouteAdapter(
-    private val context: CoroutineScope,
-    private val dataset: List<Route>
+    private val context: CoroutineScope
 ) : RecyclerView.Adapter<RouteAdapter.RouteViewHolder>() {
 
     class RouteViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -163,7 +175,7 @@ class RouteAdapter(
     }
 
     override fun onBindViewHolder(holder: RouteViewHolder, position: Int) {
-        val item = dataset[position]
+        val item = routes_dataset[position]
 
         val routeGrade: TextView = holder.routeView.getViewById(R.id.grade) as TextView
         routeGrade.text = item.ID.toString()
@@ -172,6 +184,6 @@ class RouteAdapter(
     }
 
     override fun getItemCount(): Int {
-        return dataset.size
+        return routes_dataset.size
     }
 }

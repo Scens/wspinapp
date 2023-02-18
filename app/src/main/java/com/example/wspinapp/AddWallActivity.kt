@@ -2,35 +2,24 @@ package com.example.wspinapp
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.Wall
 import com.example.wspinapp.utils.ImageDealer
 import com.example.wspinapp.utils.backendClient
-import id.zelory.compressor.Compressor
-import id.zelory.compressor.constraint.format
-import id.zelory.compressor.constraint.quality
-import id.zelory.compressor.constraint.resolution
-import id.zelory.compressor.constraint.size
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.io.File
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -82,18 +71,30 @@ class AddWallActivity : AppCompatActivity() {
     fun submitWall(view: View) {
         Log.println(Log.DEBUG, " submit wall ", "submitting wall")
         val holds = findViewById<CircleOverlayView>(R.id.holds_canvas).getHolds()
-        var wallId: UInt
+        val wallId: UInt
+        var wall: Wall
         runBlocking {
-            wallId = backendClient.addWall(Wall(holds.toTypedArray()))
+            wall = backendClient.addWall(Wall(holds.toTypedArray()))
+        }
+        wallId = wall.ID!!
+
+        if (wallId == 0u) {
+            // TODO handle error and present it to user
+            finish()
+            return
         }
 
         GlobalScope.launch {
-            imageDealer.uploadCompressedImage(wallId)
+            wall.ImageUrl = imageDealer.uploadCompressedImage(wallId)
         }
 
         runBlocking {
-            imageDealer.uploadCompressedImagePreview(wallId) // this weights up to 10kb so it should be fairly fast
+            wall.ImagePreviewUrl = imageDealer.uploadCompressedImagePreview(wallId) // this weights up to 10kb so it should be fairly fast
+            Log.println(Log.INFO, "add_wall_activity", "imagePreviewUrl = ${wall.ImagePreviewUrl}")
+
         }
+
+        dataset.add(wall)
         // TODO instead of fetching walls again we can simply use the response and add it by hand here
         invalid = true
         finish() // probably need to do sth else though :)

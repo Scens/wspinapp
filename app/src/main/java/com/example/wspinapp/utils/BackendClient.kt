@@ -1,9 +1,11 @@
 package com.example.wspinapp.utils
 
 import android.util.Log
+import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.Route
 import com.example.wspinapp.model.Wall
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
@@ -45,25 +47,25 @@ class BackendClient {
         return res
     }
 
-    suspend fun addWall(wall: Wall): UInt {
+    suspend fun addWall(wall: Wall): Wall {
         val response: HttpResponse = client.post("$BACKEND_URL/walls") {
             basicAuth("wspinapp", "wspinapp")
             setBody(Json.encodeToString(wall))
         }
 
         if (response.status != HttpStatusCode.Created) {
-            Log.println(Log.INFO, "backend-client", "Failed to create wall, status=${response.status}")
-            return 0u
+            Log.println(Log.INFO, "backend-client", "Failed to create wall, status=${response.status} for ${response.request.url} ")
+            return Wall(ID = 0u, Holds =  emptyArray())
         }
         val res : Wall = Json.decodeFromString(response.bodyAsText())
 
         logResponse(response)
 
-        return res.ID!!
+        return res
     }
 
 
-    suspend fun addImageToWall(wallId: UInt, file: File, path: String? = "image"): HttpResponse {
+    suspend fun addImageToWall(wallId: UInt, file: File, path: String? = "image"): String {
         val response: HttpResponse =
             client.patch("$BACKEND_URL/walls/$wallId/$path") {
                 basicAuth("wspinapp", "wspinapp")
@@ -95,7 +97,7 @@ class BackendClient {
                 }
             }
         logResponse(response)
-        return response
+        return Json.decodeFromString(response.bodyAsText())
     }
 
     suspend fun getWall(wallId: UInt): Wall? {
@@ -111,16 +113,16 @@ class BackendClient {
         }
     }
 
-    suspend fun fetchRoutes(wallId: UInt): List<Route> {
+    suspend fun fetchRoutes(wallId: UInt): MutableList<Route> {
         val response: HttpResponse = client.get("$BACKEND_URL/walls/$wallId/routes") {
             basicAuth("wspinapp", "wspinapp")
         }
         if (response.status != HttpStatusCode.OK) {
             Log.println(Log.INFO, "backend-client", "Failed to get routes for wall=$wallId, status=${response.status}")
-            return emptyList()
+            return mutableListOf()
         }
 
-        val routes: List<Route> = Json.decodeFromString(response.bodyAsText())
+        val routes: MutableList<Route> = Json.decodeFromString(response.bodyAsText())
         logResponse(response)
 
         return routes

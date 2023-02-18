@@ -2,6 +2,7 @@ package com.example.wspinapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -68,11 +69,7 @@ class WallsActivity : AppCompatActivity() {    // on below line we are creating 
         if (!invalid) {
             return
         }
-        val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
-        runBlocking {
-            dataset = backendClient.fetchWalls()
-            recyclerView.adapter = WallAdapter(this)
-        }
+        wallsRV.adapter?.notifyDataSetChanged()
     }
 
     fun openWall(view: View) {
@@ -115,7 +112,8 @@ class WallAdapter(
         val textView: TextView = holder.wallView.getViewById(R.id.wall_id) as TextView
         textView.text = item.ID.toString()
 
-        if (item.ImageUrl?.isBlank() == false) {
+        Log.println(Log.INFO, "Adapter", "imagePreviewUrl is ${item.ImagePreviewUrl}")
+        if (item.ImagePreviewUrl?.isBlank() == false) {
             holder.wallView.findViewById<ImageView>(R.id.wall_image).load(item.ImagePreviewUrl)
         }
         walls[item.ID!!] = item

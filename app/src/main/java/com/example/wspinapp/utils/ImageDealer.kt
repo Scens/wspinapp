@@ -15,102 +15,117 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
 
-const val IMAGE_PATH = "image.png"
-const val COMPRESSED_IMAGE_PATH = "compressed_image.png"
-const val COMPRESSED_IMAGE_PREVIEW_FILE = "compressed_image_preview.png"
 
 class ImageDealer(private val activity: AppCompatActivity) {
-    private lateinit var imageFile: File
-    private lateinit var compressedImageFile: File
-    private lateinit var compressedImagePreviewFile: File
-
-//    init {
-//        imageFile = getImageFile(IMAGE_PATH)
-//        compressedImageFile = getImageFile(COMPRESSED_IMAGE_PATH)
-//        compressedImagePreviewFile = getImageFile(COMPRESSED_IMAGE_PREVIEW_FILE)
-//    }
+    private var imageFile = SyncFile("image.jpg", activity)
+    private var compressedImageFile = SyncFile("compressed_image.jpg", activity)
+    private var compressedImagePreviewFile = SyncFile("compressed_image_preview.jpg", activity)
 
     @OptIn(DelicateCoroutinesApi::class)
     fun takePicture(imageView: ImageView) {
+        imageFile.init()
+        compressedImageFile.init()
+        compressedImagePreviewFile.init()
 
-        imageFile = getImageFile(IMAGE_PATH)
-        compressedImageFile = getImageFile(COMPRESSED_IMAGE_PATH)
-        compressedImagePreviewFile = getImageFile(COMPRESSED_IMAGE_PREVIEW_FILE)
 
         activity.registerForActivityResult(ActivityResultContracts.TakePicture()) {
             Log.println(Log.INFO, "take_picture", "saved correctly:$it")
-            imageView.setImageURI(getUri(imageFile))
+            imageView.setImageURI(getUri(imageFile.getFile()))
             GlobalScope.launch {
-                compressImageFile()
-                compressImagePreviewFile()
+                compressedImageFile.compressFile(imageFile.getFile(), SyncFile.CompressionType.NORMAL)
+                compressedImagePreviewFile.compressFile(imageFile.getFile(), SyncFile.CompressionType.HARD)
 
                 Log.println(
                     Log.INFO,
                     "take_picture",
-                    "Compressed image size ${compressedImageFile.length()}."
+                    "Compressed image size ${compressedImageFile.getFile().length()}."
                 )
                 Log.println(
                     Log.INFO,
                     "take_picture",
-                    "Compressed imagePreview size ${compressedImagePreviewFile.length()}."
+                    "Compressed imagePreview size ${compressedImagePreviewFile.getFile().length()}."
                 )
 
 
                 Log.println(
                     Log.INFO,
                     "take_picture",
-                    "Compressed image path ${compressedImageFile.path}"
+                    "Compressed image path ${compressedImageFile.getFile().path}"
                 )
                 Log.println(
                     Log.INFO,
                     "take_picture",
-                    "Compressed imagePreview path ${compressedImagePreviewFile.path}"
+                    "Compressed imagePreview path ${compressedImagePreviewFile.getFile().path}"
                 )
 
             }
-        }.launch(getUri(imageFile))
+        }.launch(getUri(imageFile.getFile()))
     }
 
-    private suspend fun compressImageFile() {
-        Compressor.compress(activity, imageFile) {
-            resolution(1280, 720)
-            quality(80)
-            format(Bitmap.CompressFormat.WEBP)
-            size(500_000) // 0.5 MB
-            default()
-            destination(compressedImageFile)
-        }
+
+    suspend fun uploadCompressedImage(wallId: UInt): String {
+        return backendClient.addImageToWall(wallId, compressedImageFile.attainFile(), "image")
     }
 
-    private suspend fun compressImagePreviewFile() {
-        Compressor.compress(activity, imageFile) {
-            resolution(128, 72)
-            quality(40)
-            format(Bitmap.CompressFormat.WEBP)
-            size(10_000) // 10kb
-            default()
-            destination(compressedImagePreviewFile)
-        }
+    suspend fun uploadCompressedImagePreview(wallId: UInt): String {
+        return backendClient.addImageToWall(wallId, compressedImagePreviewFile.attainFile(), "imagepreview")
     }
 
-    suspend fun uploadCompressedImage(wallId: UInt) {
-        // TODO if compressing didn't make it in time do sth
-        backendClient.addImageToWall(wallId, compressedImageFile, "image")
+    private fun getUri(file: File): Uri {
+        return FileProvider.getUriForFile(activity, "com.example.wspinapp", file)
+    }
+}
+
+class SyncFile(private var path: String, private val activity: AppCompatActivity) {
+    private var file: File? = null
+    private var compressed: Boolean = false
+
+    enum class CompressionType {
+        HARD, NORMAL
     }
 
-    suspend fun uploadCompressedImagePreview(wallId: UInt) {
-        // TODO if compressing didn't make it in time do sth
-        backendClient.addImageToWall(wallId, compressedImagePreviewFile, "imagepreview")
-    }
-
-    private fun getImageFile(path: String): File {
-        return File(
+    fun init() {
+        file = File(
             activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
             path
         )
     }
 
-    private fun getUri(file: File): Uri {
-        return FileProvider.getUriForFile(activity, "com.example.wspinapp", file)
+    fun getFile(): File {
+        return file!!
+    }
+
+    fun attainFile(): File {
+        synchronized(this) {
+            while (!compressed) {
+                Thread.sleep(1000)
+            }
+
+            compressed = false
+            return file!!
+        }
+    }
+
+    suspend fun compressFile(originalFile: File, compressionType: CompressionType) {
+        if (compressionType == CompressionType.NORMAL) {
+            Compressor.compress(activity, originalFile) {
+                resolution(1280, 720)
+                quality(80)
+                format(Bitmap.CompressFormat.JPEG)
+                size(500_000) // 0.5 MB
+                default()
+                destination(file!!)
+            }
+        } else if (compressionType == CompressionType.HARD) {
+            Compressor.compress(activity, originalFile) {
+                resolution(128, 72)
+                quality(40)
+                format(Bitmap.CompressFormat.JPEG)
+                size(10_000) // 10kb
+                default()
+                destination(file!!)
+            }
+        }
+        compressed = true
     }
 }
