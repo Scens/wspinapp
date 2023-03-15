@@ -18,6 +18,8 @@ import coil.load
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.Route
 import com.example.wspinapp.model.Wall
+import com.example.wspinapp.utils.CircleDrawer
+import com.example.wspinapp.utils.HoldDrawer
 import com.example.wspinapp.utils.backendClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
@@ -97,10 +99,10 @@ class WallActivity : AppCompatActivity() {
 }
 
 class HoldsOverlay constructor(context: Context, attrs: AttributeSet?) : View(context, attrs) {
-    private val circleDrawer = CircleDrawer(context, alpha = 15)
-    private val holdsDrawer = CircleDrawer(context, R.color.rock_sunny)
-    private val startHoldsDrawer = CircleDrawer(context, R.color.horizon_pink)
-    private val topHoldsDrawer = CircleDrawer(context, R.color.horizon_green)
+    private val circleDrawer = HoldDrawer(context, alpha = 15)
+    private val holdsDrawer = HoldDrawer(context, R.color.rock_sunny)
+    private val startHoldsDrawer = HoldDrawer(context, R.color.horizon_pink)
+    private val topHoldsDrawer = HoldDrawer(context, R.color.horizon_green)
 
 
     private var wallHolds : Array<Hold> = emptyArray()
@@ -118,16 +120,16 @@ class HoldsOverlay constructor(context: Context, attrs: AttributeSet?) : View(co
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         wallHolds.forEach {
-            circleDrawer.drawCircle(canvas, it.X, it.Y, it.Size)
+            circleDrawer.draw(it, canvas)
         }
         holds.forEach {
-            holdsDrawer.drawCircle(canvas, it.X, it.Y, it.Size)
+            holdsDrawer.draw(it, canvas)
         }
         startHolds.forEach {
-            startHoldsDrawer.drawCircle(canvas, it.X, it.Y, it.Size)
+            startHoldsDrawer.draw(it, canvas)
         }
         topHolds.forEach {
-            topHoldsDrawer.drawCircle(canvas, it.X, it.Y, it.Size)
+            topHoldsDrawer.draw(it, canvas)
         }
     }
 

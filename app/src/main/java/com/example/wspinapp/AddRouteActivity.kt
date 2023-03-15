@@ -14,10 +14,10 @@ import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.HoldType
 import com.example.wspinapp.model.Route
 import com.example.wspinapp.model.Wall
+import com.example.wspinapp.utils.HoldPicker
+import com.example.wspinapp.utils.ViewFrame
 import com.example.wspinapp.utils.backendClient
 import kotlinx.coroutines.runBlocking
-import kotlin.math.abs
-import kotlin.math.sqrt
 
 class AddRouteActivity : AppCompatActivity() {
     var wallID: UInt = 0u
@@ -81,84 +81,40 @@ class AddRouteActivity : AppCompatActivity() {
 
 // TODO maybe this should be implemented using ScaleGestureDetector somehow?
 class AddHoldsOverlayView constructor(context: Context, attrs: AttributeSet?) : View(context, attrs) {
-    private val circleDrawer = CircleDrawer(context, alpha = 30)
-    private val holdsDrawer = CircleDrawer(context, R.color.rock_sunny)
-    private val startHoldsDrawer = CircleDrawer(context, R.color.horizon_pink)
-    private val topHoldsDrawer = CircleDrawer(context, R.color.horizon_green)
-
-    private var holds : MutableMap<Hold, HoldType> = mutableMapOf()
-    private var touchX : Float = 0f
-    private var touchY : Float = 0f
+    private val holdPicker = HoldPicker(context)
+    private var frame: ViewFrame? = null
 
     init {
         // any initialization code here
     }
 
     constructor(context: Context) : this(context, null)
-    // other constructors can be added here as well, depending on your requirements
-
-    private fun getClickedHolds(): List<Hold> {
-        val clicked = mutableListOf<Hold>()
-        for (circle in holds) {
-            if (pointInCircle(touchX, touchY, circle.key)) {
-                clicked.add(circle.key)
-            }
-        }
-        return clicked
-    }
-
-    private fun pointInCircle(x: Float, y: Float, circle: Hold) : Boolean {
-        val distX = abs(circle.X - x)
-        val distY = abs(circle.Y - y)
-
-        return sqrt(distX * distX + distY * distY) <= circle.Size
-    }
 
 
     // This warning says that we didn't override performClick method - this is a method that is helpful to people with impaired vision
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        // we register coordinates of last touch
-        touchX = event.x
-        touchY = event.y
-
-        if (event.action == MotionEvent.ACTION_DOWN) {
-            val clickedHolds = getClickedHolds()
-            clickedHolds.forEach { hold ->
-                when (holds[hold]) {
-                    HoldType.WALL_HOLD -> holds[hold] = HoldType.HOLD
-                    HoldType.HOLD -> holds[hold] = HoldType.START_HOLD
-                    HoldType.START_HOLD -> holds[hold] = HoldType.TOP_HOLD
-                    HoldType.TOP_HOLD -> holds[hold] = HoldType.WALL_HOLD
-                    else -> {} // shouldn't happen TODO
-                }
-            }
+        if (holdPicker.onTouchEvent(event, frame!!)) {
+            invalidate()
+            return true
         }
-        invalidate()
-        return true
+        return false
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        holds.forEach { holdEntry ->
-            val hold: Hold = holdEntry.key
-            when (holdEntry.value) {
-                HoldType.WALL_HOLD -> circleDrawer.drawCircle(canvas, hold.X, hold.Y, hold.Size)
-                HoldType.HOLD -> holdsDrawer.drawCircle(canvas, hold.X, hold.Y, hold.Size)
-                HoldType.START_HOLD -> startHoldsDrawer.drawCircle(canvas, hold.X, hold.Y, hold.Size)
-                HoldType.TOP_HOLD -> topHoldsDrawer.drawCircle(canvas, hold.X, hold.Y, hold.Size)
-            }
+        if (frame == null) { // dirty hack this should be done in slightly different way
+            frame = ViewFrame(0f, 0f, this.width.toFloat(), this.height.toFloat(), 1f)
         }
+        holdPicker.onDraw(canvas, frame!!)
 
     }
 
     fun setHolds(wallHolds: Array<Hold>) {
-        wallHolds.forEach {
-            this.holds[it] = HoldType.WALL_HOLD
-        }
+        holdPicker.setHolds(wallHolds)
     }
 
     fun getHolds() : MutableMap<Hold, HoldType> {
-        return holds
+        return holdPicker.getHolds()
     }
 }
