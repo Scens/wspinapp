@@ -3,30 +3,29 @@ package com.example.wspinapp
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Paint
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.SeekBar
-import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.Wall
-import com.example.wspinapp.utils.ImageDealer
-import com.example.wspinapp.utils.backendClient
+import com.example.wspinapp.utils.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.math.abs
-import kotlin.math.sqrt
 
 
 // TODO Refactor so that it's easier to understand what's going on in here
 class AddWallActivity : AppCompatActivity() {
     private var circleRadius = 50f
+    private var listenerScale = false
     private var imageDealer = ImageDealer(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,8 +37,10 @@ class AddWallActivity : AppCompatActivity() {
     }
 
     private fun setImageView() {
-        imageDealer.takePicture(findViewById(R.id.add_wall_image))
+        val imageView = findViewById<ImageView>(R.id.add_wall_image)
+        imageDealer.takePicture(imageView)
         val overlay = findViewById<CircleOverlayView>(R.id.holds_canvas)
+        overlay.init(imageView)
         overlay.setCircleRadius(circleRadius)
     }
 
@@ -51,12 +52,12 @@ class AddWallActivity : AppCompatActivity() {
         seekBar.max = (maxValue - minValue).toInt()
         seekBar.progress = (circleRadius - minValue).toInt()
         val circleView = findViewById<CircleView>(R.id.circle_view)
-        circleView.setCircleRadius(circleRadius)
+        circleView.setHoldSize(circleRadius)
         val circleOverlayView = findViewById<CircleOverlayView>(R.id.holds_canvas)
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 circleRadius = minValue + progress
-                circleView.setCircleRadius(circleRadius)
+                circleView.setHoldSize(circleRadius)
                 circleOverlayView.setCircleRadius(circleRadius)
 
             }
@@ -69,6 +70,7 @@ class AddWallActivity : AppCompatActivity() {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun submitWall(view: View) {
+        findViewById<Button>(R.id.create_wall).isEnabled = false
         Log.println(Log.DEBUG, " submit wall ", "submitting wall")
         val holds = findViewById<CircleOverlayView>(R.id.holds_canvas).getHolds()
         val wallId: UInt
@@ -95,149 +97,74 @@ class AddWallActivity : AppCompatActivity() {
         }
 
         dataset.add(wall)
-        // TODO instead of fetching walls again we can simply use the response and add it by hand here
         invalid = true
         finish() // probably need to do sth else though :)
 
     }
-}
 
-
-class CircleDrawer(context: Context, color: Int = R.color.yellow, alpha: Int = 255) {
-    private val paint: Paint = Paint()
-
-    init {
-        paint.color = ContextCompat.getColor(context, color)
-        paint.alpha = alpha
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 10f
+    fun switchListener(view: View) {
+        listenerScale = !listenerScale
+        findViewById<CircleOverlayView>(R.id.holds_canvas).listenGesturesMode = listenerScale
     }
-
-    fun drawCircle(canvas: Canvas?, x: Float, y: Float, radius: Float) {
-        canvas?.drawCircle(x, y, radius, paint)
-    }
-
 }
 
 class CircleView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    private var circleRadius: Float = 0f
-    private val circleDrawer = CircleDrawer(context)
+    private val holdDrawer = HoldDrawer(context)
+    private var hold = HoldSpecification()
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        circleDrawer.drawCircle(canvas,width / 2f, height / 2f, circleRadius)
+        holdDrawer.draw(hold, width / 2f, height / 2f, canvas!!)
     }
 
-    fun setCircleRadius(circleRadius: Float) {
-        this.circleRadius = circleRadius
+    fun setHoldSize(size: Float) {
+        hold.size = size
         invalidate()
     }
 }
 
-
-// TODO maybe this should be implemented using ScaleGestureDetector somehow?
 class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : View(context, attrs) {
-    private val circleDrawer = CircleDrawer(context)
-
-    // STATE
-    private var touchX = 0f
-    private var touchY = 0f
-    private var circleRadius: Float = 0f // set by seekBar
-
-    private var draggedCircleRadius = 0f
-    private var finishedDragging: Boolean = false
-
-    private val circles = mutableListOf<Hold>()
-
-    init {
-        // any initialization code here
-    }
+    var listenGesturesMode = false
+    private var wallOnScaleGestureListener = WallOnScaleGestureListener()
+    private var scaleGestureDetector: ScaleGestureDetector = ScaleGestureDetector(context,
+        wallOnScaleGestureListener
+    )
+    private var holdJuggler: HoldJuggler = HoldJuggler(context)
 
     constructor(context: Context) : this(context, null)
     // other constructors can be added here as well, depending on your requirements
 
-    private fun coordinatesInsideImageView(x: Float, y: Float) : Boolean {
-        return x >= draggedCircleRadius && x + draggedCircleRadius <= this.width && y >= draggedCircleRadius && y + draggedCircleRadius <= this.height
+    fun init(imageView: ImageView) {
+        wallOnScaleGestureListener.init(imageView)
     }
-
-    private fun pointInCircle(x: Float, y: Float, circle: Hold) : Boolean {
-        val distX = abs(circle.X - x)
-        val distY = abs(circle.Y - y)
-
-        return sqrt(distX * distX + distY * distY) <= circle.Size
-    }
-
-    fun setCircleRadius(circleRadius: Float) {
-        this.circleRadius = circleRadius
-    }
-
-
-    // we're either dragging an existing circle or creating a new circle with current radius
-    private fun getCircleRadius(): Float {
-        val toRemove = mutableListOf<Hold>()
-        for (circle in circles) {
-            if (pointInCircle(touchX, touchY, circle)) {
-                toRemove.add(circle)
-            }
-        }
-        circles.removeAll(toRemove) // actually would be better to only remove one circle - the one that is closest to center
-        return if (toRemove.size > 0) {
-            toRemove[0].Size // for now simply take first one
-        } else {
-            circleRadius
-        }
-    }
-
 
     // This warning says that we didn't override performClick method - this is a method that is helpful to people with impaired vision
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        // we register coordinates of last touch
-        touchX = event.x
-        touchY = event.y
-
-        if (event.action == MotionEvent.ACTION_DOWN) {
-            draggedCircleRadius = getCircleRadius()
-        }
-
-        if (event.action == MotionEvent.ACTION_UP) {
-            if (coordinatesInsideImageView(touchX, touchY)) {
-                circles.add(
-                    Hold(
-                        X = touchX,
-                        Y = touchY,
-                        Size = draggedCircleRadius,
-                        Shape = "Circle",
-                        Angle = 0f
-                    )
-                )
+        if (listenGesturesMode) {
+            if (scaleGestureDetector.onTouchEvent(event)) {
+                invalidate()
             }
-            finishedDragging = true
+        } else {
+            if (holdJuggler.onTouchEvent(event, ViewFrame.from(wallOnScaleGestureListener.imageView))) {
+                invalidate()
+            }
         }
-        invalidate()
         return true
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        circles.forEach {
-            circleDrawer.drawCircle(canvas, it.X, it.Y, it.Size)
-        }
+        holdJuggler.onDraw(canvas, ViewFrame.from(wallOnScaleGestureListener.imageView))
+    }
 
-        // drawing circle that is being dragged
-        if (coordinatesInsideImageView(touchX, touchY))
-            if (finishedDragging) {
-                finishedDragging = false
-            } else {
-                circleDrawer.drawCircle(canvas, touchX, touchY, draggedCircleRadius)
-            }
+    fun setCircleRadius(circleRadius: Float) {
+        holdJuggler.setCircleRadius(circleRadius)
     }
 
     fun getHolds() : List<Hold> {
-        return circles.toList()
+        return holdJuggler.getHolds()
     }
-
-
 }
 
 

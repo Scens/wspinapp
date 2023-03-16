@@ -22,6 +22,10 @@ enum class HoldType {
     WALL_HOLD, HOLD, START_HOLD, TOP_HOLD
 }
 
+enum class HoldShape(val str: String) {
+    CIRCLE("circle"), UNKNOWN("unknown")
+}
+
 
 @Serializable
 data class Wall(
