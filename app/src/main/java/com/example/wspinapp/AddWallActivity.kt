@@ -123,7 +123,6 @@ class CircleView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 }
 
-// TODO maybe this should be implemented using ScaleGestureDetector somehow?
 class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     var listenGesturesMode = false
     private var wallOnScaleGestureListener = WallOnScaleGestureListener()
@@ -131,7 +130,6 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
         wallOnScaleGestureListener
     )
     private var holdJuggler: HoldJuggler = HoldJuggler(context)
-    private var frame: ViewFrame? = null
 
     constructor(context: Context) : this(context, null)
     // other constructors can be added here as well, depending on your requirements
@@ -145,39 +143,19 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (listenGesturesMode) {
             if (scaleGestureDetector.onTouchEvent(event)) {
-                frame = wallOnScaleGestureListener.frame
                 invalidate()
             }
         } else {
-            Log.println(Log.DEBUG, "circle-overlay-view", "x:${event.x}, y:${event.y}")
-
-            val acted = holdJuggler.onTouchEvent(event, frame!!)
-            if (acted) {
+            if (holdJuggler.onTouchEvent(event, ViewFrame.from(wallOnScaleGestureListener.imageView))) {
                 invalidate()
             }
         }
-        Log.println(Log.DEBUG, "debug-frame", "xmin:${frame?.minX}, xmax:${frame?.maxX}\n" +
-                "ymin:${frame?.minY}, ymax:${frame?.maxY}")
-
-        val imageView = wallOnScaleGestureListener.imageView
-        val scale = wallOnScaleGestureListener.scaleFactor2
-
-
-        val minX = imageView.pivotX - imageView.width / (2 * scale)
-        val maxX = imageView.pivotX + imageView.width / (2 * scale)
-        val minY = imageView.pivotY - imageView.height / (2 * scale)
-        val maxY = imageView.pivotY + imageView.height / (2 * scale)
-        Log.println(Log.DEBUG, "debug-image", "xmin:${minX}, xmax:${maxX}\n" +
-                "ymin:${minY}, ymax:${maxY}")
         return true
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (frame == null) { // dirty hack this should be done in slightly different way
-            frame = ViewFrame(0f, 0f, this.width.toFloat(), this.height.toFloat(), 1f)
-        }
-        holdJuggler.onDraw(canvas, frame!!)
+        holdJuggler.onDraw(canvas, ViewFrame.from(wallOnScaleGestureListener.imageView))
     }
 
     fun setCircleRadius(circleRadius: Float) {

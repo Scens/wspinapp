@@ -20,7 +20,7 @@ import com.example.wspinapp.utils.backendClient
 import kotlinx.coroutines.runBlocking
 
 class AddRouteActivity : AppCompatActivity() {
-    var wallID: UInt = 0u
+    private var wallID: UInt = 0u
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.add_route)
