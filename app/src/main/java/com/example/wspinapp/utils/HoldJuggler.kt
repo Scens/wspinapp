@@ -3,53 +3,10 @@ package com.example.wspinapp.utils
 import android.content.Context
 import android.graphics.Canvas
 import android.view.MotionEvent
-import android.widget.ImageView
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.HoldShape
 import kotlin.math.abs
 import kotlin.math.sqrt
-
-class ViewFrame(
-    var minX: Float,
-    var minY: Float,
-    var maxX: Float,
-    var maxY: Float,
-    var scaleFactor: Float
-) {
-    companion object {
-        fun from(imageView: ImageView): ViewFrame {
-            val scaleFactor = imageView.scaleX // scaleY should be same
-            val width = imageView.width
-            val height = imageView.height
-
-            val l = imageView.pivotX * (scaleFactor - 1f) / scaleFactor
-            val t = imageView.pivotY * (scaleFactor - 1f) / scaleFactor
-            return ViewFrame(
-                minX = l,
-                maxX = l + width / scaleFactor,
-                minY = t,
-                maxY = t + height / scaleFactor,
-                scaleFactor = scaleFactor
-            )
-        }
-    }
-
-    fun x(x: Float): Float {
-        return (x - minX) * scaleFactor
-    }
-
-    fun y(y: Float): Float {
-        return (y - minY) * scaleFactor
-    }
-
-    fun outsideX(x: Float): Float {
-        return (x - minX) * scaleFactor
-    }
-
-    fun outsideY(y: Float): Float {
-        return (y - minY) * scaleFactor
-    }
-}
 
 class HoldDrawingState {
     var touchX: Float = 0f
@@ -75,7 +32,7 @@ class HoldJuggler(context: Context) {
                 state.touchY + state.draggedCircleRadius <= frame.maxY
     }
 
-    private fun pointInHold(x: Float, y: Float, circle: Hold) : Boolean {
+    private fun pointInHold(x: Float, y: Float, circle: Hold): Boolean {
         val distX = abs(circle.X - x)
         val distY = abs(circle.Y - y)
 
@@ -100,8 +57,8 @@ class HoldJuggler(context: Context) {
     }
 
     fun onTouchEvent(event: MotionEvent, frame: ViewFrame): Boolean { // most likely some kind of limits are needed here
-        state.touchX = frame.x(event.x)
-        state.touchY = frame.y(event.y)
+        state.touchX = frame.xToImageView(event.x)
+        state.touchY = frame.yToImageView(event.y)
 
 
         if (event.action == MotionEvent.ACTION_DOWN) {
@@ -135,8 +92,8 @@ class HoldJuggler(context: Context) {
                     angle = it.Angle,
                     shape = it.Shape,
                 )
-                val x = frame.outsideX(it.X)
-                val y = frame.outsideY(it.Y)
+                val x = frame.xToScreen(it.X)
+                val y = frame.yToScreen(it.Y)
                 holdDrawer.draw(holdSpecification, x, y, canvas)
             }
         }
@@ -148,13 +105,13 @@ class HoldJuggler(context: Context) {
                 angle = state.angle,
                 shape = state.holdShape.str,
             )
-            val x = frame.outsideX(state.touchX)
-            val y = frame.outsideY(state.touchY)
+            val x = frame.xToScreen(state.touchX)
+            val y = frame.yToScreen(state.touchY)
             holdDrawer.draw(holdSpecification, x, y, canvas)
         }
     }
 
-    private fun insideFrame(hold: Hold, frame: ViewFrame) : Boolean {
+    private fun insideFrame(hold: Hold, frame: ViewFrame): Boolean {
         return frame.minX < hold.X + hold.Size && hold.X - hold.Size < frame.maxX && frame.minY < hold.Y + hold.Size && hold.Y - hold.Size < frame.maxY
     }
 

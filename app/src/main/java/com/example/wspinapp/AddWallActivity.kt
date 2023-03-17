@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
+import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
@@ -125,9 +126,13 @@ class CircleView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
 class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     var listenGesturesMode = false
-    private var wallOnScaleGestureListener = WallOnScaleGestureListener()
-    private var scaleGestureDetector: ScaleGestureDetector = ScaleGestureDetector(context,
-        wallOnScaleGestureListener
+    private var imageViewOnScaleGestureListener = ImageViewOnScaleGestureListener()
+    private var imageViewOnGestureListener = ImageViewOnGestureListener()
+    private var scaleGestureDetector: ScaleGestureDetector = ScaleGestureDetector(
+        context, imageViewOnScaleGestureListener
+    )
+    private var gestureDetector: GestureDetector = GestureDetector(
+        context, imageViewOnGestureListener
     )
     private var holdJuggler: HoldJuggler = HoldJuggler(context)
 
@@ -135,18 +140,27 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
     // other constructors can be added here as well, depending on your requirements
 
     fun init(imageView: ImageView) {
-        wallOnScaleGestureListener.init(imageView)
+        imageViewOnScaleGestureListener.init(imageView)
+        imageViewOnGestureListener.init(imageView)
+
+        scaleGestureDetector.isStylusScaleEnabled = false
+        scaleGestureDetector.isQuickScaleEnabled = false
+
     }
 
     // This warning says that we didn't override performClick method - this is a method that is helpful to people with impaired vision
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (listenGesturesMode) {
-            if (scaleGestureDetector.onTouchEvent(event)) {
+            var res = scaleGestureDetector.onTouchEvent(event)
+            if (!scaleGestureDetector.isInProgress) {
+                res = gestureDetector.onTouchEvent(event)
+            }
+            if (res) {
                 invalidate()
             }
         } else {
-            if (holdJuggler.onTouchEvent(event, ViewFrame.from(wallOnScaleGestureListener.imageView))) {
+            if (holdJuggler.onTouchEvent(event, ViewFrame.from(imageViewOnScaleGestureListener.imageView))) {
                 invalidate()
             }
         }
@@ -155,7 +169,7 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        holdJuggler.onDraw(canvas, ViewFrame.from(wallOnScaleGestureListener.imageView))
+        holdJuggler.onDraw(canvas, ViewFrame.from(imageViewOnScaleGestureListener.imageView))
     }
 
     fun setCircleRadius(circleRadius: Float) {

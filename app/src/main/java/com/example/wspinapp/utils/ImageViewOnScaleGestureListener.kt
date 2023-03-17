@@ -6,7 +6,14 @@ import kotlin.math.max
 import kotlin.math.min
 
 
-class WallOnScaleGestureListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+// TODO maybe this is better:https://developer.android.com/develop/ui/views/touch-and-input/gestures/scroll
+/**
+ * This class is responsible for scaling of provided [ImageView].
+ * It is assumed that all detector focus points are performed inside this [ImageView].
+ *
+ * Outside tools/functionalities can figure out current view frame using [ViewFrame] class.
+ */
+class ImageViewOnScaleGestureListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
     lateinit var imageView: ImageView
     private var pivotX2 = 0f
     private var pivotY2 = 0f
@@ -19,6 +26,9 @@ class WallOnScaleGestureListener : ScaleGestureDetector.SimpleOnScaleGestureList
         this.imageView = imageView
     }
 
+    /**
+     * We want current [ViewFrame] to be always within [ImageView] bounds.
+      */
     override fun onScale(detector: ScaleGestureDetector): Boolean {
         // performing scaling
         scaleFactor2 *= detector.scaleFactor
