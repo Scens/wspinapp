@@ -32,12 +32,8 @@ class WallsActivity : AppCompatActivity() {    // on below line we are creating 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.walls)
         wallsRV = findViewById(R.id.recycler_view)
-
-        runBlocking {
-            // TODO if connection fails the exit gracefully instead of crashing app
-            dataset = backendClient.fetchWalls()
-            wallsRV.adapter = WallAdapter(this)
-        }
+        dataset = intent.getParcelableArrayListExtra("dataset")!!
+        wallsRV.adapter = WallAdapter()
 
 
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -88,9 +84,7 @@ class WallsActivity : AppCompatActivity() {    // on below line we are creating 
 val walls: MutableMap<UInt, Wall> = mutableMapOf()
 var dataset: MutableList<Wall> = ArrayList()
 
-class WallAdapter(
-    private val context: CoroutineScope
-) : RecyclerView.Adapter<WallAdapter.WallViewHolder>() {
+class WallAdapter : RecyclerView.Adapter<WallAdapter.WallViewHolder>() {
 
     class WallViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val wallView: ConstraintLayout = view.findViewById(R.id.wall_preview)

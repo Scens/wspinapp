@@ -14,7 +14,11 @@ class ViewFrame(
     var scaleFactor: Float
 ) {
     companion object {
-        fun from(imageView: ImageView): ViewFrame {
+        fun from(imageView: ImageView?): ViewFrame{
+            if (imageView == null) {
+                return ViewFrame(0f, 0f, 0f, 0f, 0f)
+            }
+
             val scaleFactor = imageView.scaleX // scaleY should be same
             val width = imageView.width
             val height = imageView.height

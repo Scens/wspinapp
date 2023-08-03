@@ -1,9 +1,12 @@
 package com.example.wspinapp.model
 
+import android.os.Parcelable
 import kotlinx.serialization.Serializable
+import kotlinx.parcelize.Parcelize
 
 
 @Serializable
+@Parcelize
 data class Hold(
     val X: Float,
     val Y: Float,
@@ -16,7 +19,7 @@ data class Hold(
     val UpdatedAt: String? = null,
     val DeletedAt: String? = null,
     val WallID: UInt? = null
-)
+) : Parcelable
 
 enum class HoldType {
     WALL_HOLD, HOLD, START_HOLD, TOP_HOLD
@@ -28,6 +31,7 @@ enum class HoldShape(val str: String) {
 
 
 @Serializable
+@Parcelize
 data class Wall(
     val Holds: Array<Hold>,
     var ImageUrl: String? = null,
@@ -37,7 +41,7 @@ data class Wall(
     val CreatedAt: String? = null,
     val UpdatedAt: String? = null,
     val DeletedAt: String? = null,
-) {
+) : Parcelable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

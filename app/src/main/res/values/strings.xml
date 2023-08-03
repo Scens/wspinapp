@@ -2,4 +2,6 @@
     <string name="app_name">wspinapp</string>
     <string name="walls">ścianki</string>
     <string name="take_picture">zrób zdjęcie</string>
+    <string name="todo">TODO</string>
+    <string name="create_wall">Create_wall</string>
 </resources>

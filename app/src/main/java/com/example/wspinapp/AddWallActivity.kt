@@ -10,13 +10,13 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.SeekBar
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.Wall
 import com.example.wspinapp.utils.*
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -49,13 +49,14 @@ class AddWallActivity : AppCompatActivity() {
         val minValue = 10f
         val maxValue = 200f
 
-        val seekBar = findViewById<SeekBar>(R.id.seek_bar)
-        seekBar.max = (maxValue - minValue).toInt()
-        seekBar.progress = (circleRadius - minValue).toInt()
+        val verticalSeekBar = findViewById<VerticalSeekBar>(R.id.seek_bar)
+
+        verticalSeekBar.max = (maxValue - minValue).toInt()
+        verticalSeekBar.progress = (circleRadius - minValue).toInt()
         val circleView = findViewById<CircleView>(R.id.circle_view)
         circleView.setHoldSize(circleRadius)
         val circleOverlayView = findViewById<CircleOverlayView>(R.id.holds_canvas)
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        verticalSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 circleRadius = minValue + progress
                 circleView.setHoldSize(circleRadius)
@@ -87,14 +88,23 @@ class AddWallActivity : AppCompatActivity() {
             return
         }
 
-        GlobalScope.launch {
-            wall.ImageUrl = imageDealer.uploadCompressedImage(wallId)
+        val activity = this
+        lifecycleScope.launch {
+            activity.executeWithHandling {
+                wall.ImageUrl = imageDealer.uploadCompressedImage(wallId)
+            }
         }
 
         runBlocking {
-            wall.ImagePreviewUrl = imageDealer.uploadCompressedImagePreview(wallId) // this weights up to 10kb so it should be fairly fast
-            Log.println(Log.INFO, "add_wall_activity", "imagePreviewUrl = ${wall.ImagePreviewUrl}")
-
+            activity.executeWithHandling {
+                wall.ImagePreviewUrl =
+                    imageDealer.uploadCompressedImagePreview(wallId) // this weights up to 10kb so it should be fairly fast
+                Log.println(
+                    Log.INFO,
+                    "add_wall_activity",
+                    "imagePreviewUrl = ${wall.ImagePreviewUrl}"
+                )
+            }
         }
 
         dataset.add(wall)
@@ -125,6 +135,7 @@ class CircleView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 }
 
 class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+    var imageView: ImageView? = null
     var listenGesturesMode = false
     private var imageViewOnScaleGestureListener = ImageViewOnScaleGestureListener()
     private var imageViewOnGestureListener = ImageViewOnGestureListener()
@@ -146,6 +157,7 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
         scaleGestureDetector.isStylusScaleEnabled = false
         scaleGestureDetector.isQuickScaleEnabled = false
 
+        this.imageView = imageView
     }
 
     // This warning says that we didn't override performClick method - this is a method that is helpful to people with impaired vision
@@ -160,7 +172,7 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
                 invalidate()
             }
         } else {
-            if (holdJuggler.onTouchEvent(event, ViewFrame.from(imageViewOnScaleGestureListener.imageView))) {
+            if (holdJuggler.onTouchEvent(event, ViewFrame.from(imageView))) {
                 invalidate()
             }
         }
@@ -169,7 +181,7 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        holdJuggler.onDraw(canvas, ViewFrame.from(imageViewOnScaleGestureListener.imageView))
+        holdJuggler.onDraw(canvas, ViewFrame.from(imageView))
     }
 
     fun setCircleRadius(circleRadius: Float) {

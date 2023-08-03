@@ -19,9 +19,8 @@ class ImageViewOnGestureListener : GestureDetector.SimpleOnGestureListener() {
         distanceX: Float,
         distanceY: Float
     ): Boolean {
-        // TODO math needed to be done here :)
-        imageView.pivotX += distanceX
-        imageView.pivotY += distanceY
+        imageView.pivotX += distanceX / (imageView.scaleX - 1f + 0.00001f)
+        imageView.pivotY += distanceY / (imageView.scaleY - 1f + 0.00001f)
 
         // adjust pivot so that we don't go out of frame - math could fail then
         imageView.pivotX = min(imageView.pivotX, imageView.width.toFloat())
