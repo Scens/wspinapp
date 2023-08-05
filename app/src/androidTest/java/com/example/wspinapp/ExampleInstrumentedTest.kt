@@ -22,3 +22,5 @@ class ExampleInstrumentedTest {
         assertEquals("com.example.wspinapp", appContext.packageName)
     }
 }
+
+// TODO Think about it how to make tests for the app? We'll most likely need to create some BackendMock (that simulates api a bit)
