@@ -1,12 +1,14 @@
 package com.example.wspinapp.utils
 
 import android.util.Log
+import android.widget.Toast
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.Route
 import com.example.wspinapp.model.Wall
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.network.sockets.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
@@ -16,6 +18,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.net.ConnectException
 
 
 const val BACKEND_URL = "http://wspinapp-backend.ddns.net"
@@ -30,22 +33,32 @@ class BackendClient {
     }
 
 
-    suspend fun fetchWalls(): MutableList<Wall> {
-        val response: HttpResponse = client.get("$BACKEND_URL/walls") {
-            basicAuth("wspinapp", "wspinapp")
+    suspend fun fetchWalls(): MutableList<Wall>? {
+        try {
+            val response: HttpResponse = client.get("$BACKEND_URL/walls") {
+                basicAuth("wspinapp", "wspinapp")
+            }
+            val responseBody = response.bodyAsText()
+
+            val res : MutableList<Wall> = Json.decodeFromString(responseBody)
+
+            logResponse(response)
+
+            return res
+
+        } catch (e: Exception) {
+            when(e) {
+                is HttpRequestTimeoutException,
+                is ConnectTimeoutException,
+                is SocketTimeoutException,
+                is ConnectException -> {
+                    return null
+                }
+                else -> throw e
+            }
         }
-        val responseBody = response.bodyAsText()
-
-        val res : MutableList<Wall> = if (responseBody == "") {
-            ArrayList()
-        } else {
-            Json.decodeFromString(responseBody)
-        }
-
-        logResponse(response)
-
-        return res
     }
+
 
     suspend fun addWall(wall: Wall): Wall {
         val response: HttpResponse = client.post("$BACKEND_URL/walls") {

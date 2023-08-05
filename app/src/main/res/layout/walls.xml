@@ -20,7 +20,8 @@
             app:rippleColor="@color/sand_shadowy"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginBottom="28dp"
-            android:onClick="addWall" />
+            android:onClick="addWall"
+            tools:ignore="SpeakableTextPresentCheck" />
 
     <androidx.recyclerview.widget.RecyclerView
             android:layout_width="0dp"
