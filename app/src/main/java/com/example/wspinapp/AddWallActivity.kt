@@ -70,47 +70,43 @@ class AddWallActivity : AppCompatActivity() {
         })
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+    // Define a custom exception
+    class WallCreationException : Exception("Failed to create the wall in the backend.")
+
     fun submitWall(view: View) {
         findViewById<Button>(R.id.create_wall).isEnabled = false
-        Log.println(Log.DEBUG, " submit wall ", "submitting wall")
+        Log.println(Log.DEBUG, "submit wall", "submitting wall")
         val holds = findViewById<CircleOverlayView>(R.id.holds_canvas).getHolds()
-        val wallId: UInt
-        var wall: Wall
-        runBlocking {
-            wall = backendClient.addWall(Wall(holds.toTypedArray()))
-        }
-        wallId = wall.ID!!
 
-        if (wallId == 0u) {
-            // TODO handle error and present it to user
-            finish()
-            return
-        }
+        this.executeNonSuspendWithHandling {
+            val wallId: UInt
+            var wall: Wall
+            runBlocking {
+                wall = backendClient.addWall(Wall(holds.toTypedArray()))
+            }
+            wallId = wall.ID!!
 
-        val activity = this
-        lifecycleScope.launch {
-            activity.executeWithHandling {
+            if (wallId == 0u) {
+                // Throw the custom exception
+                throw WallCreationException()
+            }
+
+            lifecycleScope.launch {
                 wall.ImageUrl = imageDealer.uploadCompressedImage(wallId)
             }
-        }
 
-        runBlocking {
-            activity.executeWithHandling {
-                wall.ImagePreviewUrl =
-                    imageDealer.uploadCompressedImagePreview(wallId) // this weights up to 10kb so it should be fairly fast
+            runBlocking {
+                wall.ImagePreviewUrl = imageDealer.uploadCompressedImagePreview(wallId)
                 Log.println(
                     Log.INFO,
                     "add_wall_activity",
                     "imagePreviewUrl = ${wall.ImagePreviewUrl}"
                 )
             }
+
+            WallManager.addWall(wall)
         }
-
-        dataset.add(wall)
-        invalid = true
-        finish() // probably need to do sth else though :)
-
+        finish()
     }
 
     fun switchListener(view: View) {
@@ -188,7 +184,7 @@ class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : Vi
         holdJuggler.setCircleRadius(circleRadius)
     }
 
-    fun getHolds() : List<Hold> {
+    fun getHolds(): List<Hold> {
         return holdJuggler.getHolds()
     }
 }
