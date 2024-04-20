@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
@@ -32,11 +33,13 @@ class WallsActivity : AppCompatActivity() {    // on below line we are creating 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.walls)
         wallsRV = findViewById(R.id.recycler_view)
-        dataset = intent.getParcelableArrayListExtra("dataset")!!
         wallsRV.adapter = WallAdapter()
 
+        setupItemTouchHelper()
+    }
 
-        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+    private fun setupItemTouchHelper() {
+        val itemTouchCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
@@ -49,23 +52,27 @@ class WallsActivity : AppCompatActivity() {    // on below line we are creating 
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
-                GlobalScope.launch {
-                    val wallView: ConstraintLayout =
-                        viewHolder.itemView.findViewById(R.id.wall_preview)
-                    backendClient.deleteWall(wallView.tag as UInt)
+                val activityContext = this@WallsActivity // Capture the activity's context
+
+                lifecycleScope.launch {
+                    activityContext.executeWithHandling {
+                        val wallView: ConstraintLayout =
+                            viewHolder.itemView.findViewById(R.id.wall_preview)
+                        backendClient.deleteWall(wallView.tag as UInt)
+                        (wallsRV.adapter as? WallAdapter)?.removeItem(position)
+                    }
                 }
-                wallsRV.adapter?.notifyItemRemoved(position)
-                dataset.removeAt(position)
             }
-        }).attachToRecyclerView(wallsRV)
+        }
+
+        val itemTouchHelper = ItemTouchHelper(itemTouchCallback)
+        itemTouchHelper.attachToRecyclerView(wallsRV)
     }
 
     override fun onResume() {
         super.onResume()
-        if (!invalid) {
-            return
-        }
-        wallsRV.adapter?.notifyDataSetChanged()
+        if (WallManager.haveNewItems)
+            wallsRV.adapter?.notifyDataSetChanged()
     }
 
     fun openWall(view: View) {
@@ -82,7 +89,6 @@ class WallsActivity : AppCompatActivity() {    // on below line we are creating 
 }
 
 val walls: MutableMap<UInt, Wall> = mutableMapOf()
-var dataset: MutableList<Wall> = ArrayList()
 
 class WallAdapter : RecyclerView.Adapter<WallAdapter.WallViewHolder>() {
 
@@ -102,7 +108,7 @@ class WallAdapter : RecyclerView.Adapter<WallAdapter.WallViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: WallViewHolder, position: Int) {
-        val item = dataset[position]
+        val item = WallManager.dataset[position]
         val textView: TextView = holder.wallView.getViewById(R.id.wall_id) as TextView
         textView.text = item.ID.toString()
 
@@ -114,11 +120,12 @@ class WallAdapter : RecyclerView.Adapter<WallAdapter.WallViewHolder>() {
         holder.setTag(item.ID)
     }
 
-    fun deleteFromDataset(position: Int) {
-        dataset.removeAt(position)
+    fun removeItem(position: Int) {
+        WallManager.dataset.removeAt(position)
+        notifyItemRemoved(position)
     }
 
     override fun getItemCount(): Int {
-        return dataset.size
+        return WallManager.dataset.size
     }
 }
