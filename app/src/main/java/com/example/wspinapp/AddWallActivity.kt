@@ -74,7 +74,7 @@ class AddWallActivity : AppCompatActivity() {
     class WallCreationException : Exception("Failed to create the wall in the backend.")
 
     fun submitWall(view: View) {
-        findViewById<Button>(R.id.create_wall).isEnabled = false
+        findViewById<Button>(R.id.submitWall).isEnabled = false
         Log.println(Log.DEBUG, "submit wall", "submitting wall")
         val holds = findViewById<CircleOverlayView>(R.id.holds_canvas).getHolds()
 

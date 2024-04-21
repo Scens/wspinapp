@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -37,55 +36,131 @@
         app:layout_constraintBottom_toTopOf="@id/submit"
         app:layout_constraintTop_toBottomOf="@id/add_wall_image_frame">
 
-        <com.example.wspinapp.utils.VerticalSeekBar
-            android:id="@+id/seek_bar"
-            android:layout_width="65dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/seek_bar_tool"
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:max="100"
 
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/circle_view"
+            app:layout_constraintEnd_toStartOf="@id/circle_view_tool"
 
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            >
+            <com.example.wspinapp.utils.VerticalSeekBar
+                android:id="@+id/seek_bar"
+                android:layout_width="65dp"
+                android:layout_height="0dp"
+                android:max="100"
 
-        <com.example.wspinapp.CircleView
-            android:id="@+id/circle_view"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/seek_bar_text"
+
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/seek_bar_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/seek_bar"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/circle_view_tool"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:layout_weight="2"
 
-            android:onClick="switchListener"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toStartOf="@id/create_wall"
-            app:layout_constraintStart_toEndOf="@id/seek_bar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/mode_tool"
+            app:layout_constraintStart_toEndOf="@id/seek_bar_tool"
 
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+            <com.example.wspinapp.CircleView
+                android:id="@+id/circle_view"
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/circle_view_text"
 
-        <Button
-            android:id="@+id/create_wall"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+            />
+
+            <TextView
+                android:id="@+id/circle_view_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/shape"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/circle_view"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mode_tool"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:layout_weight="2"
 
-            android:onClick="submitWall"
-            android:text="@string/create_wall"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
 
-            app:layout_constraintStart_toEndOf="@id/circle_view"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toEndOf="@id/circle_view_tool"
+            app:layout_constraintTop_toTopOf="parent"
+            >
+            <ImageView
+                android:id="@+id/mode"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+
+                android:onClick="switchListener"
+                android:text="@string/create_wall"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/mode_text"
+
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_100tb"
+                android:contentDescription="Pointy finga" />
+
+            <TextView
+                android:id="@+id/mode_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/mode"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/mode"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -97,6 +172,8 @@
         app:layout_constraintVertical_weight="1"
         >
         <Button
+            android:id="@+id/submitWall"
+            android:onClick="submitWall"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="0dp"
