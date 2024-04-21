@@ -1,78 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <FrameLayout
-            android:id="@+id/add_wall_image_frame"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            app:layout_constraintDimensionRatio="3:4"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+        android:id="@+id/add_wall_image_frame"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="3:4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-                android:id="@+id/add_wall_image"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/todo"
-                android:scaleType="fitXY"
-                app:srcCompat="@drawable/ic_launcher" />
+            android:id="@+id/add_wall_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/todo"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/ic_launcher" />
 
         <com.example.wspinapp.CircleOverlayView
-                android:id="@+id/holds_canvas"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+            android:id="@+id/holds_canvas"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </FrameLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/add_wall_image_frame">
 
-    <com.example.wspinapp.utils.VerticalSeekBar
-            android:id="@id/seek_bar"
+        <com.example.wspinapp.utils.VerticalSeekBar
+            android:id="@+id/seek_bar"
             android:layout_width="65dp"
             android:layout_height="0dp"
             android:layout_marginStart="16dp"
-            android:layout_weight="1"
-            android:max="100"
-            app:layout_constraintVertical_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/add_wall_image_frame"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
-            android:layout_marginTop="16dp" />
+            android:max="100"
 
-    <com.example.wspinapp.CircleView
-            android:id="@id/circle_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/circle_view"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.example.wspinapp.CircleView
+            android:id="@+id/circle_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginStart="24dp"
-            android:layout_weight="2"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintStart_toEndOf="@+id/seek_bar"
-            app:layout_constraintEnd_toStartOf="@+id/create_wall"
-            app:layout_constraintTop_toBottomOf="@+id/add_wall_image_frame"
-            android:onClick="switchListener"
-            tools:ignore="SpeakableTextPresentCheck"
-            android:layout_marginTop="16dp" />
-
-    <Button
-            android:id="@id/create_wall"
-            android:layout_width="97dp"
-            android:layout_height="121dp"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             android:layout_weight="2"
+
+            android:onClick="switchListener"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toStartOf="@id/create_wall"
+            app:layout_constraintStart_toEndOf="@id/seek_bar"
+
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/create_wall"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_weight="2"
+
             android:onClick="submitWall"
             android:text="@string/create_wall"
-            app:layout_constraintStart_toEndOf="@+id/circle_view"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
 
-            app:layout_constraintTop_toBottomOf="@+id/add_wall_image_frame"
-            app:layout_constraintHorizontal_bias="1.0"
-            android:layout_marginTop="16dp" />
-
+            app:layout_constraintStart_toEndOf="@id/circle_view"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
