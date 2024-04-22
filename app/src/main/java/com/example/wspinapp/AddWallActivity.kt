@@ -16,9 +16,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.Wall
 import com.example.wspinapp.utils.*
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -28,6 +25,8 @@ class AddWallActivity : AppCompatActivity() {
     private var circleRadius = 50f
     private var listenerScale = false
     private var imageDealer = ImageDealer(this)
+    private var prevView: View? = null
+    private var holds: List<Hold>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +43,7 @@ class AddWallActivity : AppCompatActivity() {
         overlay.init(imageView)
         overlay.setCircleRadius(circleRadius)
     }
+
 
     private fun setSeekBar() {
         val minValue = 10f
@@ -73,16 +73,38 @@ class AddWallActivity : AppCompatActivity() {
     // Define a custom exception
     class WallCreationException : Exception("Failed to create the wall in the backend.")
 
+    @SuppressLint("MissingInflatedId")
+    fun next(view: View) {
+        holds = findViewById<CircleOverlayView>(R.id.holds_canvas).getHolds()
+
+        if (prevView != null) {
+            val viewToSet = prevView
+            prevView = findViewById(R.id.add_wall_layout)
+            setContentView(viewToSet)
+        } else {
+            prevView = findViewById(R.id.add_wall_layout)
+            setContentView(R.layout.submit_wall)
+        }
+    }
+
+    @SuppressLint("MissingInflatedId")
+    fun back(view: View) {
+        val viewToSet = prevView
+        prevView = findViewById(R.id.submit_wall_layout)
+
+        setContentView(viewToSet)
+    }
+
+
     fun submitWall(view: View) {
-        findViewById<Button>(R.id.submitWall).isEnabled = false
+        findViewById<Button>(R.id.submit_button).isEnabled = false
         Log.println(Log.DEBUG, "submit wall", "submitting wall")
-        val holds = findViewById<CircleOverlayView>(R.id.holds_canvas).getHolds()
 
         this.executeNonSuspendWithHandling {
             val wallId: UInt
             var wall: Wall
             runBlocking {
-                wall = backendClient.addWall(Wall(holds.toTypedArray()))
+                wall = backendClient.addWall(Wall(holds!!.toTypedArray()))
             }
             wallId = wall.ID!!
 
@@ -112,6 +134,17 @@ class AddWallActivity : AppCompatActivity() {
     fun switchListener(view: View) {
         listenerScale = !listenerScale
         findViewById<CircleOverlayView>(R.id.holds_canvas).listenGesturesMode = listenerScale
+
+        // This can probably be done better using some kind of ScrollerImageView or sth but this seems ok.
+        if (listenerScale) {
+            findViewById<ImageView>(R.id.current_mode).setImageResource(R.drawable.control_image_dark)
+            findViewById<ImageView>(R.id.control_image).setImageResource(R.drawable.control_image_dark)
+            findViewById<ImageView>(R.id.pick_image).setImageResource(R.drawable.pick_image_light)
+        } else {
+            findViewById<ImageView>(R.id.current_mode).setImageResource(R.drawable.pick_image_dark)
+            findViewById<ImageView>(R.id.control_image).setImageResource(R.drawable.control_image_light)
+            findViewById<ImageView>(R.id.pick_image).setImageResource(R.drawable.pick_image_dark)
+        }
     }
 }
 
@@ -130,8 +163,8 @@ class CircleView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 }
 
-class CircleOverlayView constructor(context: Context, attrs: AttributeSet?) : View(context, attrs) {
-    var imageView: ImageView? = null
+class CircleOverlayView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+    private var imageView: ImageView? = null
     var listenGesturesMode = false
     private var imageViewOnScaleGestureListener = ImageViewOnScaleGestureListener()
     private var imageViewOnGestureListener = ImageViewOnGestureListener()
