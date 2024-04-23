@@ -109,8 +109,8 @@ class WallAdapter : RecyclerView.Adapter<WallAdapter.WallViewHolder>() {
 
     override fun onBindViewHolder(holder: WallViewHolder, position: Int) {
         val item = WallManager.dataset[position]
-        val textView: TextView = holder.wallView.getViewById(R.id.wall_id) as TextView
-        textView.text = item.ID.toString()
+        val wallId: TextView = holder.wallView.getViewById(R.id.wall_id) as TextView
+        wallId.text = item.ID.toString()
 
         Log.println(Log.INFO, "Adapter", "imagePreviewUrl is ${item.ImagePreviewUrl}")
         if (item.ImagePreviewUrl?.isBlank() == false) {

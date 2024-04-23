@@ -4,4 +4,8 @@
     <string name="take_picture">zrób zdjęcie</string>
     <string name="todo">TODO</string>
     <string name="create_wall">Create_wall</string>
+    <string name="next">Next</string>
+    <string name="size">SIZE</string>
+    <string name="shape">SHAPE</string>
+    <string name="mode">MODE</string>
 </resources>
