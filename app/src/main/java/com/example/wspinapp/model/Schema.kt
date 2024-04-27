@@ -8,6 +8,10 @@ import kotlinx.parcelize.Parcelize
 @Serializable
 @Parcelize
 data class Hold(
+//    Assume every image is in ratio 3:4
+//    X should be a Float between 0 - 100
+//    Y as well
+//
     val X: Float,
     val Y: Float,
     val Size: Float,
