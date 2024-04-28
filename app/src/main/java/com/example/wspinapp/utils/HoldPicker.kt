@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.view.MotionEvent
-import android.view.View
 import com.example.wspinapp.R
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.HoldType
@@ -21,21 +20,21 @@ class HoldPicker(context: Context) {
     private var touchX : Float = 0f
     private var touchY : Float = 0f
 
-    private fun getClickedHolds(): List<Hold> {
+    private fun getClickedHolds(frame: ViewFrame): List<Hold> {
         val clicked = mutableListOf<Hold>()
         for (circle in holds) {
-            if (pointInCircle(touchX, touchY, circle.key)) {
+            if (pointInCircle(touchX, touchY, circle.key, frame)) {
                 clicked.add(circle.key)
             }
         }
         return clicked
     }
 
-    private fun pointInCircle(x: Float, y: Float, circle: Hold) : Boolean {
-        val distX = abs(circle.X - x)
-        val distY = abs(circle.Y - y)
+    private fun pointInCircle(x: Float, y: Float, circle: Hold, frame: ViewFrame) : Boolean {
+        val distX = abs(circle.getAbsoluteX(frame) - x)
+        val distY = abs(circle.getAbsoluteY(frame) - y)
 
-        return sqrt(distX * distX + distY * distY) <= circle.Size
+        return sqrt(distX * distX + distY * distY) <= circle.getAbsoluteSize(frame)
     }
 
 
@@ -47,7 +46,7 @@ class HoldPicker(context: Context) {
         touchY = event.y
 
         if (event.action == MotionEvent.ACTION_DOWN) {
-            val clickedHolds = getClickedHolds()
+            val clickedHolds = getClickedHolds(frame)
             clickedHolds.forEach { hold ->
                 when (holds[hold]) {
                     HoldType.WALL_HOLD -> holds[hold] = HoldType.HOLD

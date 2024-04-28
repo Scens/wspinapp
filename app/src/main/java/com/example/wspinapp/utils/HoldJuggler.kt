@@ -32,19 +32,19 @@ class HoldJuggler(context: Context) {
                 state.touchY + state.draggedCircleRadius <= frame.maxY
     }
 
-    private fun pointInHold(x: Float, y: Float, circle: Hold): Boolean {
-        val distX = abs(circle.X - x)
-        val distY = abs(circle.Y - y)
+    private fun pointInHold(x: Float, y: Float, circle: Hold, frame: ViewFrame): Boolean {
+        val distX = abs(circle.getAbsoluteX(frame) - x)
+        val distY = abs(circle.getAbsoluteY(frame) - y)
 
         return sqrt(distX * distX + distY * distY) <= circle.Size
     }
 
     // we're either dragging an existing circle or creating a new circle with current radius
-    private fun getCircleRadius(scaleFactor: Float): Float {
+    private fun getCircleRadius(frame: ViewFrame): Float {
         val toRemove = mutableListOf<Hold>()
         for (hold in holds) {
             assert(hold.Shape == HoldShape.CIRCLE.str) // TODO more hold shapes in future
-            if (pointInHold(state.touchX, state.touchY, hold)) {
+            if (pointInHold(state.touchX, state.touchY, hold, frame)) {
                 toRemove.add(hold) // todo don't remove all holds just the one with mid closes to point
             }
         }
@@ -52,7 +52,7 @@ class HoldJuggler(context: Context) {
         return if (toRemove.size > 0) {
             toRemove[0].Size // for now simply take first one
         } else {
-            state.circleRadius / scaleFactor
+            state.circleRadius / frame.scaleFactor
         }
     }
 
@@ -63,15 +63,15 @@ class HoldJuggler(context: Context) {
 
         if (event.action == MotionEvent.ACTION_DOWN) {
             dragging = true
-            state.draggedCircleRadius = getCircleRadius(frame.scaleFactor)
+            state.draggedCircleRadius = getCircleRadius(frame)
         }
         if (event.action == MotionEvent.ACTION_UP && dragging) {
             if (holdInsideViewFrame(frame)) {
                 holds.add(
                     Hold(
-                        X = state.touchX,
-                        Y = state.touchY,
-                        Size = state.draggedCircleRadius,
+                        X = state.touchX / frame.parentWidth,
+                        Y = state.touchY / frame.parentHeight,
+                        Size = state.draggedCircleRadius / frame.parentWidth,
                         Shape = HoldShape.CIRCLE.str,
                         Angle = 0f
                     )
@@ -88,12 +88,12 @@ class HoldJuggler(context: Context) {
             if (insideFrame(it, frame)) {
                 // scale Hold
                 val holdSpecification = HoldSpecification(
-                    size = it.Size * frame.scaleFactor,
+                    size = it.getAbsoluteSize(frame) * frame.scaleFactor,
                     angle = it.Angle,
                     shape = it.Shape,
                 )
-                val x = frame.xToScreen(it.X)
-                val y = frame.yToScreen(it.Y)
+                val x = frame.xToScreen(it.getAbsoluteX(frame))
+                val y = frame.yToScreen(it.getAbsoluteY(frame))
                 holdDrawer.draw(holdSpecification, x, y, canvas)
             }
         }
@@ -112,7 +112,10 @@ class HoldJuggler(context: Context) {
     }
 
     private fun insideFrame(hold: Hold, frame: ViewFrame): Boolean {
-        return frame.minX < hold.X + hold.Size && hold.X - hold.Size < frame.maxX && frame.minY < hold.Y + hold.Size && hold.Y - hold.Size < frame.maxY
+        val cx = hold.getAbsoluteX(frame)
+        val cy = hold.getAbsoluteY(frame)
+        val size = hold.getAbsoluteSize(frame)
+        return frame.minX < cx + size && cx - size < frame.maxX && frame.minY < cy + size && cy - size < frame.maxY
     }
 
     fun setCircleRadius(circleRadius: Float) { // not really circle radius but size in general

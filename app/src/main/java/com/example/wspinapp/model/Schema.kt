@@ -1,6 +1,8 @@
 package com.example.wspinapp.model
 
 import android.os.Parcelable
+import android.view.View
+import com.example.wspinapp.utils.ViewFrame
 import kotlinx.serialization.Serializable
 import kotlinx.parcelize.Parcelize
 
@@ -8,13 +10,9 @@ import kotlinx.parcelize.Parcelize
 @Serializable
 @Parcelize
 data class Hold(
-//    Assume every image is in ratio 3:4
-//    X should be a Float between 0 - 100
-//    Y as well
-//
-    val X: Float,
-    val Y: Float,
-    val Size: Float,
+    val X: Float, // between 0.0 and 1.0
+    val Y: Float, // between 0.0 and 1.0
+    val Size: Float, // to calculate absolute Size one has to multiply this value by frame max width
     val Shape: String,
     val Angle: Float,
 
@@ -23,7 +21,19 @@ data class Hold(
     val UpdatedAt: String? = null,
     val DeletedAt: String? = null,
     val WallID: UInt? = null
-) : Parcelable
+) : Parcelable {
+    fun getAbsoluteX(viewFrame: ViewFrame): Float {
+        return X * viewFrame.parentWidth
+    }
+
+    fun getAbsoluteY(viewFrame: ViewFrame): Float {
+        return Y * viewFrame.parentHeight
+    }
+
+    fun getAbsoluteSize(viewFrame: ViewFrame): Float {
+        return Size * viewFrame.parentWidth
+    }
+}
 
 enum class HoldType {
     WALL_HOLD, HOLD, START_HOLD, TOP_HOLD

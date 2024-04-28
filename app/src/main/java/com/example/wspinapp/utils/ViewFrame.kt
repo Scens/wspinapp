@@ -11,12 +11,14 @@ class ViewFrame(
     var minY: Float,
     var maxX: Float,
     var maxY: Float,
-    var scaleFactor: Float
+    var scaleFactor: Float,
+    var parentWidth: Int,
+    var parentHeight: Int,
 ) {
     companion object {
         fun from(imageView: ImageView?): ViewFrame{
             if (imageView == null) {
-                return ViewFrame(0f, 0f, 0f, 0f, 0f)
+                return ViewFrame(0f, 0f, 0f, 0f, 0f, 1, 1)
             }
 
             val scaleFactor = imageView.scaleX // scaleY should be same
@@ -30,7 +32,9 @@ class ViewFrame(
                 maxX = l + width / scaleFactor,
                 minY = t,
                 maxY = t + height / scaleFactor,
-                scaleFactor = scaleFactor
+                scaleFactor = scaleFactor,
+                parentWidth = imageView.measuredWidth,
+                parentHeight = imageView.measuredHeight,
             )
         }
     }

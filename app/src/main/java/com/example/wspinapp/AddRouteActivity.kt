@@ -104,7 +104,7 @@ class AddHoldsOverlayView constructor(context: Context, attrs: AttributeSet?) : 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (frame == null) { // dirty hack this should be done in slightly different way
-            frame = ViewFrame(0f, 0f, this.width.toFloat(), this.height.toFloat(), 1f)
+            frame = ViewFrame(0f, 0f, this.width.toFloat(), this.height.toFloat(), 1f, this.measuredWidth, this.measuredHeight)
         }
         holdPicker.onDraw(canvas, frame!!)
 
