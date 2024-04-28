@@ -3,6 +3,7 @@ package com.example.wspinapp.utils
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.example.wspinapp.R
 import com.example.wspinapp.model.Hold
@@ -35,9 +36,13 @@ class HoldDrawer(context: Context, color: Int = R.color.yellow, alpha: Int = 255
         also all triangle, circle and rectangle drawers should implement an interface draw
      */
 
-    fun draw(hold: Hold, canvas: Canvas, scaleFactor: Float = 1f) {
+    fun draw(hold: Hold, canvas: Canvas) {
+        val cx = hold.X * canvas.width
+        val cy = hold.Y * canvas.height
+        val size = hold.Size * canvas.width
+
         assert(hold.Shape.lowercase() == HoldShape.CIRCLE.str) { hold.Shape } // for now we can only add circle but it will change in future
-        circleDrawer.drawCircle(canvas, hold.X, hold.Y, hold.Size * scaleFactor)
+        circleDrawer.drawCircle(canvas, cx, cy, size)
     }
 
     fun draw(state: HoldDrawingState, canvas: Canvas) {
