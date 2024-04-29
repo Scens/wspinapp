@@ -32,27 +32,27 @@ class HoldJuggler(context: Context) {
                 state.touchY + state.draggedCircleRadius <= frame.maxY
     }
 
-    private fun pointInHold(x: Float, y: Float, circle: Hold, frame: ViewFrame): Boolean {
-        val distX = abs(circle.getAbsoluteX(frame) - x)
-        val distY = abs(circle.getAbsoluteY(frame) - y)
-
-        return sqrt(distX * distX + distY * distY) <= circle.Size
-    }
-
     // we're either dragging an existing circle or creating a new circle with current radius
     private fun getCircleRadius(frame: ViewFrame): Float {
-        val toRemove = mutableListOf<Hold>()
+        var toRemove: Hold? = null
+        var distance = 1000000f
         for (hold in holds) {
             assert(hold.Shape == HoldShape.CIRCLE.str) // TODO more hold shapes in future
-            if (pointInHold(state.touchX, state.touchY, hold, frame)) {
-                toRemove.add(hold) // todo don't remove all holds just the one with mid closes to point
+            val distX = abs(hold.getAbsoluteX(frame) - state.touchX)
+            val distY = abs(hold.getAbsoluteY(frame) - state.touchY)
+
+            val dist = sqrt(distX * distX + distY * distY)
+            if (dist <= hold.getAbsoluteSize(frame) && dist < distance) {
+                toRemove = hold
+                distance = dist
             }
         }
-        holds.removeAll(toRemove) // actually would be better to only remove one circle - the one that is closest to center
-        return if (toRemove.size > 0) {
-            toRemove[0].Size // for now simply take first one
+
+        return if (toRemove != null) {
+            holds.remove(toRemove)
+            toRemove.getAbsoluteSize(frame)
         } else {
-            state.circleRadius / frame.scaleFactor
+            state.circleRadius
         }
     }
 
