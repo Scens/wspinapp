@@ -9,11 +9,15 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import coil.load
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.HoldType
 import com.example.wspinapp.model.Route
 import com.example.wspinapp.model.Wall
+import com.example.wspinapp.utils.HoldDrawer
 import com.example.wspinapp.utils.HoldPicker
 import com.example.wspinapp.utils.ViewFrame
 import com.example.wspinapp.utils.backendClient
@@ -24,6 +28,19 @@ class AddRouteActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.add_route)
+
+        val topView = findViewById<ConstraintLayout>(R.id.top).findViewById<TextView>(R.id.description)
+        val regularView = findViewById<ConstraintLayout>(R.id.regular).findViewById<TextView>(R.id.description)
+        val startView = findViewById<ConstraintLayout>(R.id.start).findViewById<TextView>(R.id.description)
+
+        topView.text = "TOP"
+        topView.setTextColor(ContextCompat.getColor(applicationContext, R.color.rock_sunny))
+
+        regularView.text = "REGULAR"
+        regularView.setTextColor(ContextCompat.getColor(applicationContext, R.color.horizon_pink))
+
+        startView.text = "START"
+        startView.setTextColor(ContextCompat.getColor(applicationContext, R.color.horizon_green))
 
         wallID = intent.getStringExtra(WALL_ID_MESSAGE)!!.toUInt()
         val wall: Wall = walls[wallID]!!
