@@ -9,6 +9,8 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
+import android.widget.RadioButton
+import androidx.core.content.ContextCompat
 import coil.load
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.HoldType
@@ -21,9 +23,15 @@ import kotlinx.coroutines.runBlocking
 
 class AddRouteActivity : AppCompatActivity() {
     private var wallID: UInt = 0u
+    private var selectedRadioButton: Int? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.add_route)
+
+        findViewById<RadioButton>(R.id.top).setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.horizon_green))
+        findViewById<RadioButton>(R.id.regular).setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.rock_sunny))
+        findViewById<RadioButton>(R.id.start).setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.horizon_pink))
 
         wallID = intent.getStringExtra(WALL_ID_MESSAGE)!!.toUInt()
         val wall: Wall = walls[wallID]!!
@@ -31,6 +39,7 @@ class AddRouteActivity : AppCompatActivity() {
         setImageView(wall.ImageUrl)
 
         findViewById<AddHoldsOverlayView>(R.id.add_holds_canvas).setHolds(wall.Holds)
+        setRegularRadioButton(findViewById(R.id.regular))
     }
 
     private fun setImageView(imageUrl: String?) {
@@ -39,6 +48,56 @@ class AddRouteActivity : AppCompatActivity() {
             imageView.load(imageUrl)
         }
     }
+
+    fun setTopRadioButton(view: View) {
+        val view: RadioButton = view as RadioButton
+        if (selectedRadioButton == view.id) {
+            selectedRadioButton = null
+            view.isChecked = false
+            findViewById<AddHoldsOverlayView>(R.id.add_holds_canvas).setCurrentHoldType(HoldType.WALL_HOLD)
+        }
+        else {
+            selectedRadioButton = view.id
+            view.isChecked = true
+            findViewById<RadioButton>(R.id.regular).isChecked = false
+            findViewById<RadioButton>(R.id.start).isChecked = false
+            findViewById<AddHoldsOverlayView>(R.id.add_holds_canvas).setCurrentHoldType(HoldType.TOP_HOLD)
+        }
+    }
+
+    fun setRegularRadioButton(view: View) {
+        val view: RadioButton = view as RadioButton
+        if (selectedRadioButton == view.id) {
+            selectedRadioButton = null
+            view.isChecked = false
+            findViewById<AddHoldsOverlayView>(R.id.add_holds_canvas).setCurrentHoldType(HoldType.WALL_HOLD)
+        }
+        else {
+            selectedRadioButton = view.id
+            view.isChecked = true
+            findViewById<RadioButton>(R.id.top).isChecked = false
+            findViewById<RadioButton>(R.id.start).isChecked = false
+            findViewById<AddHoldsOverlayView>(R.id.add_holds_canvas).setCurrentHoldType(HoldType.HOLD)
+        }
+    }
+
+    fun setStartRadioButton(view: View) {
+        val view: RadioButton = view as RadioButton
+        if (selectedRadioButton == view.id) {
+            selectedRadioButton = null
+            view.isChecked = false
+            findViewById<AddHoldsOverlayView>(R.id.add_holds_canvas).setCurrentHoldType(HoldType.WALL_HOLD)
+        }
+        else {
+            selectedRadioButton = view.id
+            view.isChecked = true
+            findViewById<RadioButton>(R.id.regular).isChecked = false  
+            findViewById<RadioButton>(R.id.top).isChecked = false
+            findViewById<AddHoldsOverlayView>(R.id.add_holds_canvas).setCurrentHoldType(HoldType.START_HOLD)
+
+        }
+    }
+
 
     fun submitRoute(view: View) {
         val holds: MutableMap<Hold, HoldType> =
@@ -82,6 +141,7 @@ class AddRouteActivity : AppCompatActivity() {
 // TODO maybe this should be implemented using ScaleGestureDetector somehow?
 class AddHoldsOverlayView constructor(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val holdPicker = HoldPicker(context)
+    private var currentHoldType: HoldType = HoldType.HOLD
     private var frame: ViewFrame? = null
 
     init {
@@ -91,10 +151,14 @@ class AddHoldsOverlayView constructor(context: Context, attrs: AttributeSet?) : 
     constructor(context: Context) : this(context, null)
 
 
+    fun setCurrentHoldType(holdType: HoldType) {
+        currentHoldType = holdType
+    }
+
     // This warning says that we didn't override performClick method - this is a method that is helpful to people with impaired vision
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (holdPicker.onTouchEvent(event, frame!!)) {
+        if (holdPicker.onTouchEvent(event, frame!!, currentHoldType)) {
             invalidate()
             return true
         }

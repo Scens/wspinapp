@@ -1,42 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <FrameLayout
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            app:layout_constraintDimensionRatio="3:4"
-            app:srcCompat="@drawable/ic_launcher"
-            android:id="@+id/add_route_image_frame"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+        android:id="@+id/add_route_image_frame"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="3:4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_launcher">
 
         <ImageView
-                android:layout_width="fill_parent"
-                android:layout_height="match_parent"
-                app:srcCompat="@drawable/ic_launcher"
-                android:id="@+id/add_route_wall_image"/>
+            android:id="@+id/add_route_wall_image"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_launcher" />
 
         <com.example.wspinapp.AddHoldsOverlayView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/add_holds_canvas" />
+            android:id="@+id/add_holds_canvas"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </FrameLayout>
 
-    <Button
-            android:text="Dodaj balderka"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button2"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/add_route_image_frame"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/legend"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/right_bottom"
+        >
+
+
+            <RadioButton
+                android:id="@+id/top"
+                android:layout_margin="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toTopOf="parent"
+                android:gravity="center"
+                android:onClick="setTopRadioButton"
+                app:layout_constraintBottom_toTopOf="@id/regular"
+                android:text="TOP"
+                />
+            <RadioButton
+                android:id="@+id/regular"
+                android:layout_margin="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toBottomOf="@id/top"
+                app:layout_constraintBottom_toTopOf="@id/start"
+                android:onClick="setRegularRadioButton"
+                android:text="REGULAR"
+                android:gravity="center"
+                />
+            <RadioButton
+                android:id="@+id/start"
+                android:layout_margin="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toBottomOf="@id/regular"
+                android:onClick="setStartRadioButton"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:text="START"
+                android:gravity="center"
+            />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/right_bottom"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toEndOf="@id/legend"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="24dp"
-            android:layout_marginEnd="24dp"
-            android:onClick="submitRoute" />
+            >
+
+            <Button
+                android:id="@+id/button2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="24dp"
+                android:onClick="submitRoute"
+                android:text="Dodaj balderka"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
