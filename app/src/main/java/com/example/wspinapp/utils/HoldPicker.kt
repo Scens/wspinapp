@@ -11,7 +11,7 @@ import kotlin.math.abs
 import kotlin.math.sqrt
 
 class HoldPicker(context: Context) {
-    private val defaultDrawer = HoldDrawer(context, alpha = 30)
+    private val defaultDrawer = HoldDrawer(context, alpha = 80)
     private val holdsDrawer = HoldDrawer(context, R.color.rock_sunny)
     private val startHoldsDrawer = HoldDrawer(context, R.color.horizon_pink)
     private val topHoldsDrawer = HoldDrawer(context, R.color.horizon_green)

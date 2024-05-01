@@ -16,7 +16,7 @@ data class HoldSpecification (
     var shape: String = HoldShape.CIRCLE.str,
 )
 
-class HoldDrawer(context: Context, color: Int = R.color.yellow, alpha: Int = 255) {
+class HoldDrawer(context: Context, color: Int = R.color.white, alpha: Int = 255) {
     private val paint: Paint = Paint()
     private var circleDrawer: CircleDrawer
 

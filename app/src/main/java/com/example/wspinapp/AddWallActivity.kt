@@ -149,7 +149,7 @@ class AddWallActivity : AppCompatActivity() {
 }
 
 class CircleView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    private val holdDrawer = HoldDrawer(context)
+    private val holdDrawer = HoldDrawer(context, color = androidx.appcompat.R.color.material_grey_800)
     private var hold = HoldSpecification()
 
     override fun onDraw(canvas: Canvas?) {

@@ -99,7 +99,7 @@ class WallActivity : AppCompatActivity() {
 }
 
 class HoldsOverlay constructor(context: Context, attrs: AttributeSet?) : View(context, attrs) {
-    private val circleDrawer = HoldDrawer(context, alpha = 15)
+    private val circleDrawer = HoldDrawer(context, alpha = 80)
     private val holdsDrawer = HoldDrawer(context, R.color.rock_sunny)
     private val startHoldsDrawer = HoldDrawer(context, R.color.horizon_pink)
     private val topHoldsDrawer = HoldDrawer(context, R.color.horizon_green)
