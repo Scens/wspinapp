@@ -42,31 +42,41 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/right_bottom"
         >
-            <include android:id="@+id/top"
-                layout="@layout/hold_legend"
+
+
+            <RadioButton
+                android:id="@+id/top"
+                android:layout_margin="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 app:layout_constraintTop_toTopOf="parent"
+                android:gravity="center"
+                android:onClick="setTopRadioButton"
                 app:layout_constraintBottom_toTopOf="@id/regular"
-
-            />
-            <include android:id="@+id/regular"
-                layout="@layout/hold_legend"
+                android:text="TOP"
+                />
+            <RadioButton
+                android:id="@+id/regular"
+                android:layout_margin="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 app:layout_constraintTop_toBottomOf="@id/top"
                 app:layout_constraintBottom_toTopOf="@id/start"
-
+                android:onClick="setRegularRadioButton"
+                android:text="REGULAR"
+                android:gravity="center"
                 />
-            <include android:id="@+id/start"
-                layout="@layout/hold_legend"
+            <RadioButton
+                android:id="@+id/start"
+                android:layout_margin="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 app:layout_constraintTop_toBottomOf="@id/regular"
+                android:onClick="setStartRadioButton"
                 app:layout_constraintBottom_toBottomOf="parent"
-
-                />
-
+                android:text="START"
+                android:gravity="center"
+            />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -40,7 +40,7 @@ class HoldPicker(context: Context) {
 
     // This warning says that we didn't override performClick method - this is a method that is helpful to people with impaired vision
     @SuppressLint("ClickableViewAccessibility")
-    fun onTouchEvent(event: MotionEvent, frame: ViewFrame): Boolean {
+    fun onTouchEvent(event: MotionEvent, frame: ViewFrame, selectedHoldType: HoldType): Boolean {
         // we register coordinates of last touch
         touchX = event.x
         touchY = event.y
@@ -49,11 +49,10 @@ class HoldPicker(context: Context) {
             val clickedHolds = getClickedHolds(frame)
             clickedHolds.forEach { hold ->
                 when (holds[hold]) {
-                    HoldType.WALL_HOLD -> holds[hold] = HoldType.HOLD
-                    HoldType.HOLD -> holds[hold] = HoldType.START_HOLD
-                    HoldType.START_HOLD -> holds[hold] = HoldType.TOP_HOLD
-                    HoldType.TOP_HOLD -> holds[hold] = HoldType.WALL_HOLD
-                    else -> {} // shouldn't happen TODO
+                    selectedHoldType -> holds[hold] = HoldType.WALL_HOLD
+                    else -> {
+                        holds[hold] = selectedHoldType
+                    }
                 }
             }
         }
