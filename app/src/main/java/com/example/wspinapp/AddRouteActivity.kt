@@ -143,11 +143,6 @@ class AddHoldsOverlayView constructor(context: Context, attrs: AttributeSet?) : 
     private val holdPicker = HoldPicker(context)
     private var currentHoldType: HoldType = HoldType.HOLD
     private var frame: ViewFrame? = null
-
-    init {
-        // any initialization code here
-    }
-
     constructor(context: Context) : this(context, null)
 
 
