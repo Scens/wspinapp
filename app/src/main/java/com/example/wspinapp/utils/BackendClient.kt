@@ -1,7 +1,9 @@
 package com.example.wspinapp.utils
 
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import com.example.wspinapp.WallsActivity
 import com.example.wspinapp.model.Hold
 import com.example.wspinapp.model.Route
 import com.example.wspinapp.model.Wall

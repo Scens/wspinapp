@@ -5,13 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.example.wspinapp.utils.backendClient
+import com.example.wspinapp.utils.FetchWallsActivity
 import io.ktor.client.network.sockets.*
 import io.ktor.client.plugins.*
-import kotlinx.coroutines.launch
 import java.net.ConnectException
 import kotlin.random.Random
 
@@ -68,16 +67,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    fun showWalls(view: View) {
-        val activity = this
-        lifecycleScope.launch {
-            activity.executeWithHandling {
-                WallManager.fetchWalls() // fetchWalls is a suspend function
-                val intent = Intent(activity, WallsActivity::class.java)
-                startActivity(intent)
-            }
+    override fun onResume() {
+        super.onResume()
 
-        }
+        findViewById<Button>(R.id.main_button).isEnabled = true
+    }
+
+    fun showWalls(view: View) {
+        findViewById<Button>(R.id.main_button).isEnabled = false
+        val fetchWallIntent = Intent(this, FetchWallsActivity::class.java)
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        startActivity(fetchWallIntent)
     }
 
 
